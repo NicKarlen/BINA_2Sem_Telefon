@@ -1,5 +1,6 @@
 import json
 import hashlib
+import pandas as pd
 
 
 # https://www.geeksforgeeks.org/with-statement-in-python/ 
@@ -29,3 +30,7 @@ sha = hashlib.sha256("0-0795027408".encode())
 print(md5.hexdigest())
 print(sha.hexdigest())
 
+
+# Use the built in function of pandas to get the data from the SQL database with read_sql_query
+# Load the data into a DataFrame
+surveys_df = pd.read_sql_query("SELECT * from surveys", con)

@@ -3,7 +3,9 @@ import json
 import pandas as pd
 import os
 import sqlite3
-print("Code running...")
+from datetime import datetime
+
+print("Code running...", datetime.now())
 
 # Dict to store the unencrypted and encrypted pairs as key-value pairs.
 anon_dict = {}
@@ -63,6 +65,7 @@ with open('Data/json_anon.json', 'w') as outfile:
 
 # Write the dataframe "df_anon" to the database
 con = sqlite3.connect('db_anon.db')
-df_anon.to_sql(name='df_anon', con=con)
+df_anon.to_sql(name='df_anon', con=con, if_exists="replace")
+con.close()
 
-print("Code done...")
+print("Code done...", datetime.now())
