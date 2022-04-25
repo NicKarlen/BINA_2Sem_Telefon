@@ -3,6 +3,7 @@ import json
 import pandas as pd
 import os
 import sqlite3
+print("Code running...")
 
 # Dict to store the unencrypted and encrypted pairs as key-value pairs.
 anon_dict = {}
@@ -21,8 +22,6 @@ path = "/Data/CDRdata_20211116_kurz.xlsx"
 
 # Read the CSV data from the telefone-log-file
 df_org = pd.read_excel(base_directory+path)
-
-print(df_org)
 
 # Anonymize the columnes that are critical and store the hash in a dict for later investigations
 def anonColumns(row):
@@ -62,12 +61,8 @@ df_anon.drop('Name', axis="columns", inplace=True)
 with open('Data/json_anon.json', 'w') as outfile:
     json.dump(anon_dict, outfile)
 
-# df_anon.to_excel(excel_writer= base_directory+ "/Dataset_anonymized.xlsx",startcol=0,startrow=0)
-
 # Write the dataframe "df_anon" to the database
 con = sqlite3.connect('db_anon.db')
-
 df_anon.to_sql(name='df_anon', con=con)
 
-
-print(df_anon)
+print("Code done...")
