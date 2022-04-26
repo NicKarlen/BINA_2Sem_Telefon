@@ -21,8 +21,8 @@ def prep():
     base_directory = os.path.dirname(os.path.realpath(__file__))
 
     # Paths for excelsheets in the base directory
-    path_recordings = "/Data/CDRdata_20211116_kurz.xlsx"
-    # path_recordings = "/Data/CDRdata_20211116.xlsx"
+    # path_recordings = "/Data/CDRdata_20211116_kurz.xlsx"
+    path_recordings = "/Data/20220426_Telefonjournal_J_AUL_FIM.xlsx"
     path_team_list = "/Data/Team-Versionen.xlsx"
 
 
@@ -37,11 +37,20 @@ def prep():
     df_org['Team inkl. Version'] = NaN
 
     # Function to assign the Team to every TN-Nr.
-    def getTeam(row):
+    def adjustTable(row):
+
+        # Clean up the Rufnummer
+        if len(str(row["Rufnummer"])) >= 9:
+            row["Rufnummer"] = "0" + str(row["Rufnummer"])[-9:]
+        # Clean up the Durchwahl-Nr.
+        if len(str(row["Durchwahl-Nr."])) >= 9:
+            row["Durchwahl-Nr."] = "0" + str(row["Durchwahl-Nr."])[-9:]
+
         # Change the TN-Nr. to int for further comparison
         if str(row["TN-Nr."]) != "nan":
-            row["TN-Nr."] = int(row["TN-Nr."]) 
-        # Create two var's
+            row["TN-Nr."] = int(row["TN-Nr."])
+
+        # Assign the Team to every TN-Nr. (in the given period)
         tn_number = row['TN-Nr.']
         tn_date = row["Datum"]
         for i in range(0,df_teams.shape[0]):
@@ -54,8 +63,10 @@ def prep():
                 row['Team inkl. Version'] = str(df_teams.loc[i,'Team inkl. Version']) 
         return row
     # Call the defined function (above) on every row.
-    print("Function getTeam started - Time: ",datetime.now())
-    df_org = df_org.apply(getTeam, axis="columns")
+    print("Function adjustTable started - Time: ",datetime.now())
+    df_org = df_org.apply(adjustTable, axis="columns")
+
+    # print(df_org.tail(10))
 
     # Anonymize the columnes that are critical and store the "key:value"-pair as hash and actual value in a dict for later investigations
     def anonColumns(row):
