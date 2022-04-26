@@ -12,11 +12,6 @@ def prep():
     # Dict to store the unencrypted and encrypted pairs as key-value pairs.
     anon_dict = {}
 
-    # Function to make a md5 string from a string
-    def getMd5(item):
-        val = str(item)
-        return hashlib.md5(val.encode()).hexdigest()
-
     # Find the path where this script is located
     base_directory = os.path.dirname(os.path.realpath(__file__))
 
@@ -67,6 +62,11 @@ def prep():
     df_org = df_org.apply(adjustTable, axis="columns")
 
     # print(df_org.tail(10))
+
+    # Function to make a md5 hash-string from a string
+    def getMd5(item):
+        val = str(item)
+        return hashlib.md5(val.encode()).hexdigest()
 
     # Anonymize the columnes that are critical and store the "key:value"-pair as hash and actual value in a dict for later investigations
     def anonColumns(row):
