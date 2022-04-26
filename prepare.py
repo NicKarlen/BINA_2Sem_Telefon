@@ -22,7 +22,7 @@ def prep():
 
     # Paths for excelsheets in the base directory
     # path_recordings = "/Data/CDRdata_20211116_kurz.xlsx"
-    path_recordings = "/Data/20220426_Telefonjournal_J_AUL_FIM.xlsx"
+    path_recordings = "/Data/20220426 Telefonjournal_J_AUL_FIM_28.04.2021.xlsx"
     path_team_list = "/Data/Team-Versionen.xlsx"
 
 
