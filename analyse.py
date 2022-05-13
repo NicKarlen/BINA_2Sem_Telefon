@@ -3,7 +3,6 @@ import sqlite3
 import os
 from datetime import datetime
 
-
 # Insert the DB name which is stored in the forlder Analyse/DB
 db_name = "db_anon.db"
 # Find the path where this script is located
@@ -70,7 +69,7 @@ def amount_of_calls_during_weekdays():
         return pd.read_sql_query(f"SELECT Wochentag, Zeit FROM df_working_hours WHERE Wochentag = '{day}' ", con)
     
     # create a dictonary and call the function about with the given weekday.
-    dict_calls_per_hour = {
+    dict_calls_per_weekday = {
         "Montag": check_days('Montag').shape[0],
         "Dienstag": check_days('Dienstag').shape[0],
         "Mittwoch": check_days('Mittwoch').shape[0],
@@ -78,7 +77,7 @@ def amount_of_calls_during_weekdays():
         "Freitag": check_days('Freitag').shape[0]
     }
     # change the dict to a dataframe
-    df = pd.DataFrame.from_dict(dict_calls_per_hour, orient='index')
+    df = pd.DataFrame.from_dict(dict_calls_per_weekday, orient='index')
     # print the dataframe
     print("Jährliche Anzahl von Anrufen während:", df)
     # Write the dataframe to the database: "df_number_of_calls_during_weekdays"
@@ -96,7 +95,7 @@ def amount_of_calls_during_months():
         return pd.read_sql_query(f"SELECT Tag, Monat, Jahr FROM df_working_hours WHERE Monat = '{month}' ", con)
     
     # create a dictonary and call the function about with the given weekday.
-    dict_calls_per_hour = {
+    dict_calls_per_month = {
         "01": check_months('1').shape[0],
         "02": check_months('2').shape[0],
         "03": check_months('3').shape[0],
@@ -111,10 +110,40 @@ def amount_of_calls_during_months():
         "12": check_months('12').shape[0]
     }
     # change the dict to a dataframe
-    df = pd.DataFrame.from_dict(dict_calls_per_hour, orient='index')
+    df = pd.DataFrame.from_dict(dict_calls_per_month, orient='index')
     # print the dataframe
     print("Jährliche Anzahl von Anrufen während Monat:", df)
     # Write the dataframe to the database: "df_number_of_calls_during_months"
     df.to_sql(name='df_number_of_calls_during_months', con=con, if_exists="replace")
+    # close the connection to the database
+    con.close()
+
+
+# function to extract the amount of calls each date of the whole year
+def amount_of_calls_each_date():
+    # Create a connection to the database
+    con = sqlite3.connect(db_path)
+    # function to query the db and return a dataframe
+    def check_months(search_date):
+        return pd.read_sql_query(f"SELECT Tag, Monat, Jahr FROM df_working_hours WHERE Datum = '{search_date}' ", con)
+    
+    # create a dictonary
+    dict_calls_per_date = {}
+    # start and end date for the date array function "pd.date_range"
+    start_date = datetime(year=2021,month=4,day=28)
+    end_date = datetime(year=2022,month=4,day=25)
+    # pandas function to get an array of dates. freq='B' stands for Business so we only get the business days during that time.
+    weekday_dates = pd.date_range(start=start_date, end=end_date, freq='B')
+    
+    # search for calls on each date from the above array
+    for date in weekday_dates:
+        dict_calls_per_date[date] = check_months(date).shape[0]
+
+    # change the dict to a dataframe
+    df = pd.DataFrame.from_dict(dict_calls_per_date, orient='index')
+    # print the dataframe
+    print("Summe der Tägliche Anrufe an jedem Datum:", df)
+    # Write the dataframe to the database: "df_amount_of_calls_each_date"
+    df.to_sql(name='df_amount_of_calls_each_date', con=con, if_exists="replace")
     # close the connection to the database
     con.close()

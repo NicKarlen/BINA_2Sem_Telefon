@@ -13,8 +13,10 @@ if __name__ == "__main__":
     # prepare.prep()
 
     # analyse.filter_workinghours()
+
     # analyse.amount_of_calls_during_hours()
     # analyse.amount_of_calls_during_weekdays()
-    analyse.amount_of_calls_during_months()
+    # analyse.amount_of_calls_during_months()
+    analyse.amount_of_calls_each_date()
 
     print("Code finished.........")
