@@ -1,4 +1,5 @@
 import prepare
+import analyse
 import pandas as pd
 
 
@@ -9,6 +10,11 @@ import pandas as pd
 if __name__ == "__main__":
     print("Code running..........")
 
-    prepare.prep()
+    # prepare.prep()
+
+    # analyse.filter_workinghours()
+    # analyse.amount_of_calls_during_hours()
+    # analyse.amount_of_calls_during_weekdays()
+    analyse.amount_of_calls_during_months()
 
     print("Code finished.........")
