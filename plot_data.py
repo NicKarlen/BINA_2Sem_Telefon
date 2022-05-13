@@ -7,7 +7,7 @@ def plot_amount_of_calls_during_X(db_path):
     # Create a connection to the database
     con = sqlite3.connect(db_path)
     # query the db and return a dataframe
-    df_hours = pd.read_sql_query(f"SELECT * FROM df_number_of_calls_during_hours", con)
+    df_hours = pd.read_sql_query(f"SELECT * FROM df_number_of_calls_during_hours_lost_connected", con)
     df_weekdays = pd.read_sql_query(f"SELECT * FROM df_number_of_calls_during_weekdays", con)
     df_months = pd.read_sql_query(f"SELECT * FROM df_number_of_calls_during_months", con)
     # close the connection to the database
@@ -17,11 +17,13 @@ def plot_amount_of_calls_during_X(db_path):
     fig, axes = plt.subplots(nrows=1, ncols=3, sharex=False)
 
     # Output the plots
-    df_hours.plot.bar(x="index", y=["0"], ax=axes[0], xlabel='Tageszeiten', ylabel="Anzahl Eingehende Anrufe", legend=False)
-    df_weekdays.plot.bar(x="index", y=["0"], ax=axes[1], xlabel='Wochentage', legend=False)
-    df_months.plot.bar(x="index", y=["0"], ax=axes[2], xlabel='Monate', legend=False)
+    df_hours.plot.bar(x="index", y=["Verbunden"]+["Verloren"], ax=axes[0], xlabel='Tageszeiten', ylabel="Anzahl Eingehende Anrufe", legend=True)
+    df_weekdays.plot.bar(x="index", y=["Anzahl Total"], ax=axes[1], xlabel='Wochentage', legend=True)
+    df_months.plot.bar(x="index", y=["Anzahl Total"], ax=axes[2], xlabel='Monate', legend=True)
     # Adjust the spacing at the bottom of the window
     plt.subplots_adjust(bottom=0.3)
+    # Set main titel above all subplots
+    fig.suptitle("Auswertung der Eingehenden Anrufe während der Öffnungszeiten")
     # Show the plot
     plt.show()    
 
@@ -48,5 +50,7 @@ def plot_amount_of_daily_calls(db_path):
 
     # Adjust the spacing at the bottom of the window
     plt.subplots_adjust(bottom=0.3, left=0.038, right=0.976)
+    # Set titel
+    plt.title("Auswertung der Eingehenden Anrufe während der Öffnungszeiten")
     # Show the plot
     plt.show()  

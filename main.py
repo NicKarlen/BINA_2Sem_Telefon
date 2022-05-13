@@ -27,8 +27,8 @@ if __name__ == "__main__":
     # analyse.amount_of_calls_each_date(db_path)
 
     """ Explore the Data """
-    # plot_data.plot_amount_of_calls_during_X(db_path)
-    plot_data.plot_amount_of_daily_calls(db_path)
+    plot_data.plot_amount_of_calls_during_X(db_path)
+    # plot_data.plot_amount_of_daily_calls(db_path)
 
 
     print("Code finished.........")
