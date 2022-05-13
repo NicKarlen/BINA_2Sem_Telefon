@@ -3,18 +3,11 @@ import sqlite3
 import os
 from datetime import datetime
 
-# Insert the DB name which is stored in the forlder Analyse/DB
-db_name = "db_anon.db"
-# Find the path where this script is located
-base_directory = os.path.dirname(os.path.realpath(__file__))
-# DB Path
-db_path = f"{base_directory}/{db_name}"
-
 
 # Filter the original db, so that we only have calls during the workinghours.
 # Montag-Donnerstag: 8:00-12:00  13:30-17:00
 # Freitag: 8:00-12:00  13:30-16:00.
-def filter_workinghours():
+def filter_workinghours(db_path):
     # Create a connection to the database
     con = sqlite3.connect(db_path)
     # filter for all incoming calls during working hours
@@ -32,7 +25,7 @@ def filter_workinghours():
 
 
 # function to extract the amount of calls during the daily hours
-def amount_of_calls_during_hours():
+def amount_of_calls_during_hours(db_path):
     # Create a connection to the database
     con = sqlite3.connect(db_path)
     # function to query the db and return a dataframe
@@ -61,7 +54,7 @@ def amount_of_calls_during_hours():
 
 
 # function to extract the amount of calls on each weekday
-def amount_of_calls_during_weekdays():
+def amount_of_calls_during_weekdays(db_path):
     # Create a connection to the database
     con = sqlite3.connect(db_path)
     # function to query the db and return a dataframe
@@ -87,7 +80,7 @@ def amount_of_calls_during_weekdays():
 
 
 # function to extract the amount of calls on each month
-def amount_of_calls_during_months():
+def amount_of_calls_during_months(db_path):
     # Create a connection to the database
     con = sqlite3.connect(db_path)
     # function to query the db and return a dataframe
@@ -120,7 +113,7 @@ def amount_of_calls_during_months():
 
 
 # function to extract the amount of calls each date of the whole year
-def amount_of_calls_each_date():
+def amount_of_calls_each_date(db_path):
     # Create a connection to the database
     con = sqlite3.connect(db_path)
     # function to query the db and return a dataframe
@@ -134,7 +127,7 @@ def amount_of_calls_each_date():
     end_date = datetime(year=2022,month=4,day=25)
     # pandas function to get an array of dates. freq='B' stands for Business so we only get the business days during that time.
     weekday_dates = pd.date_range(start=start_date, end=end_date, freq='B')
-    
+
     # search for calls on each date from the above array
     for date in weekday_dates:
         dict_calls_per_date[date] = check_months(date).shape[0]

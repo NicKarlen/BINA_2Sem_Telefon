@@ -1,22 +1,33 @@
 import prepare
 import analyse
+import plot_data
 import pandas as pd
+import os
 
-
-
+# Insert the DB name which is stored in the forlder Analyse/DB
+db_name = "db_anon.db"
+# Find the path where this script is located
+base_directory = os.path.dirname(os.path.realpath(__file__))
+# DB Path
+db_path = f"{base_directory}/{db_name}"
 
 
 """ Main """
 if __name__ == "__main__":
     print("Code running..........")
 
-    # prepare.prep()
+    """ Gather Data """
+    # prepare.prep() # takes about 15min!!
 
-    # analyse.filter_workinghours()
+    """ Build Data Models """
+    # analyse.filter_workinghours(db_path)
+    # analyse.amount_of_calls_during_hours(db_path)
+    # analyse.amount_of_calls_during_weekdays(db_path)
+    # analyse.amount_of_calls_during_months(db_path)
+    # analyse.amount_of_calls_each_date(db_path)
 
-    # analyse.amount_of_calls_during_hours()
-    # analyse.amount_of_calls_during_weekdays()
-    # analyse.amount_of_calls_during_months()
-    analyse.amount_of_calls_each_date()
+    """ Explore the Data """
+    plot_data.plot_amount_of_calls_during(db_path)
+
 
     print("Code finished.........")
