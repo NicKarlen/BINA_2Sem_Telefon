@@ -30,34 +30,51 @@ def filter_workinghours(db_path):
 
 
 # function to extract the amount of calls during the daily hours
-def amount_of_calls_during_hours(db_path, in_or_out):
+def amount_of_calls_during_hours(db_path):
     # Create a connection to the database
     con = sqlite3.connect(db_path)
-    # function to query the db and return a dataframe
-    def check_hours_connected(start,end):
-        return pd.read_sql_query(f"SELECT Wochentag, Zeit FROM df_working_hours_{in_or_out} WHERE Zeit BETWEEN '{start}:00' AND '{end}:00' AND Verbunden = 1", con)
-    def check_hours_lost(start,end):
-        return pd.read_sql_query(f"SELECT Wochentag, Zeit FROM df_working_hours_{in_or_out} WHERE Zeit BETWEEN '{start}:00' AND '{end}:00' AND Verloren = 1", con)
-    
-    # create a dictonary and call the function about with the given start and end time.
-    dict_calls_per_hour = {
-        "08:00 - 09:00": [check_hours_connected('08:00','09:00').shape[0],check_hours_lost('08:00','09:00').shape[0]],
-        "09:00 - 10:00": [check_hours_connected('09:00','10:00').shape[0],check_hours_lost('09:00','10:00').shape[0]],
-        "10:00 - 11:00": [check_hours_connected('10:00','11:00').shape[0],check_hours_lost('10:00','11:00').shape[0]],
-        "11:00 - 12:00": [check_hours_connected('11:00','12:00').shape[0],check_hours_lost('11:00','12:00').shape[0]],
-        "13:30 - 14:00": [check_hours_connected('13:30','14:00').shape[0],check_hours_lost('13:30','14:00').shape[0]],
-        "14:00 - 15:00": [check_hours_connected('14:00','15:00').shape[0],check_hours_lost('14:00','15:00').shape[0]],
-        "15:00 - 16:00": [check_hours_connected('15:00','16:00').shape[0],check_hours_lost('15:00','16:00').shape[0]],
-        "16:00 - 17:00": [check_hours_connected('16:00','17:00').shape[0],check_hours_lost('16:00','17:00').shape[0]]
-    }
-    # change the dict to a dataframe
-    df = pd.DataFrame.from_dict(dict_calls_per_hour, orient='index')
+
+    def get_in_or_outbound(in_or_out):
+        # function to query the db and return a dataframe
+        def check_hours_connected(start,end):
+            return pd.read_sql_query(f"SELECT Wochentag, Zeit FROM df_working_hours_{in_or_out} WHERE Zeit BETWEEN '{start}:00' AND '{end}:00' AND Verbunden = 1", con)
+        def check_hours_lost(start,end):
+            return pd.read_sql_query(f"SELECT Wochentag, Zeit FROM df_working_hours_{in_or_out} WHERE Zeit BETWEEN '{start}:00' AND '{end}:00' AND Verloren = 1", con)
+        
+        # create a dictonary and call the function about with the given start and end time.
+        dict_calls_per_hour = {
+            "08:00 - 09:00": [check_hours_connected('08:00','09:00').shape[0],check_hours_lost('08:00','09:00').shape[0]],
+            "09:00 - 10:00": [check_hours_connected('09:00','10:00').shape[0],check_hours_lost('09:00','10:00').shape[0]],
+            "10:00 - 11:00": [check_hours_connected('10:00','11:00').shape[0],check_hours_lost('10:00','11:00').shape[0]],
+            "11:00 - 12:00": [check_hours_connected('11:00','12:00').shape[0],check_hours_lost('11:00','12:00').shape[0]],
+            "13:30 - 14:00": [check_hours_connected('13:30','14:00').shape[0],check_hours_lost('13:30','14:00').shape[0]],
+            "14:00 - 15:00": [check_hours_connected('14:00','15:00').shape[0],check_hours_lost('14:00','15:00').shape[0]],
+            "15:00 - 16:00": [check_hours_connected('15:00','16:00').shape[0],check_hours_lost('15:00','16:00').shape[0]],
+            "16:00 - 17:00": [check_hours_connected('16:00','17:00').shape[0],check_hours_lost('16:00','17:00').shape[0]]
+        }
+
+        return dict_calls_per_hour
+        
+
+    # Inbound: change dict to df
+    df_inbound = pd.DataFrame.from_dict(get_in_or_outbound('inbound'), orient='index')
     # name the columns
-    df.columns =['Verbunden',  "Verloren"]
+    df_inbound.columns =['Inbound_Verbunden',  "Inbound_Verloren"]
     # calc the ratio between lost and connected
-    df["Verhältnis"] = df["Verbunden"]/df["Verloren"]
+    df_inbound["Inbound_Verhältnis"] = df_inbound["Inbound_Verbunden"]/df_inbound["Inbound_Verloren"]
+
+    # Outbound: change dict to df
+    df_outbound = pd.DataFrame.from_dict(get_in_or_outbound('outbound'), orient='index')
+    # name the columns
+    df_outbound.columns =['Outbound_Verbunden',  "Outbound_Verloren"]
+    # calc the ratio between lost and connected
+    df_outbound["Outbound_Verhältnis"] = df_outbound["Outbound_Verbunden"]/df_outbound["Outbound_Verloren"]
+
+    # df = pd.merge(df_inbound, df_outbound, left_on='index', right_on='index')
+    df = pd.concat([df_inbound, df_outbound], axis=1)
+
     # Write the dataframe to the database: "df_number_of_calls_during_hours_lost_connected_inbound / outbound"
-    df.to_sql(name=f"df_number_of_calls_during_hours_{in_or_out}", con=con, if_exists="replace")
+    df.to_sql(name=f"df_number_of_calls_during_hours", con=con, if_exists="replace")
     # close the connection to the database
     con.close()
 
