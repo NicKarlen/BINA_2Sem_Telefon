@@ -7,7 +7,7 @@ def plot_amount_of_calls_during_X(db_path):
     # Create a connection to the database
     con = sqlite3.connect(db_path)
     # query the db and return a dataframe
-    df_hours = pd.read_sql_query(f"SELECT * FROM df_number_of_calls_during_hours_lost_connected", con)
+    df_hours = pd.read_sql_query(f"SELECT * FROM df_number_of_calls_during_hours", con)
     df_weekdays = pd.read_sql_query(f"SELECT * FROM df_number_of_calls_during_weekdays", con)
     df_months = pd.read_sql_query(f"SELECT * FROM df_number_of_calls_during_months", con)
     # close the connection to the database
@@ -40,7 +40,7 @@ def plot_amount_of_daily_calls(db_path):
     df_daily_calls['date'] = df_daily_calls['index'].str[:10]
 
     # Output the plots
-    ax = df_daily_calls.plot.bar(x="date", y=["0"], xlabel='Datum', 
+    ax = df_daily_calls.plot.bar(x="date", y=["Anzahl Anrufe"], xlabel='Datum', 
                             ylabel="Anzahl Eingehende Anrufe", legend=False)
 
     # Only show every 5th tick label
@@ -50,6 +50,28 @@ def plot_amount_of_daily_calls(db_path):
 
     # Adjust the spacing at the bottom of the window
     plt.subplots_adjust(bottom=0.3, left=0.038, right=0.976)
+    # Set titel
+    plt.title("Auswertung der Eingehenden Anrufe während der Öffnungszeiten")
+    # Show the plot
+    plt.show()  
+
+
+def plot_amount_of_calls_from_same_number(db_path):
+    # Create a connection to the database
+    con = sqlite3.connect(db_path)
+    # query the db and return a dataframe
+    df_tel_numbers = pd.read_sql_query(f"SELECT * FROM df_amount_of_calls_from_same_number", con)
+    # close the connection to the database
+    con.close()
+
+    df_short = df_tel_numbers.head(150)
+    # Output the plots
+    ax = df_short.plot.bar(x="index", y=["Anzahl Anrufe"], xlabel='Rufnummer', 
+                            ylabel="Anzahl Anrufe pro Rufnummer", legend=False)
+
+
+    # Adjust the spacing at the bottom of the window
+    plt.subplots_adjust(bottom=0.4, left=0.038, right=0.976)
     # Set titel
     plt.title("Auswertung der Eingehenden Anrufe während der Öffnungszeiten")
     # Show the plot

@@ -10,29 +10,34 @@ from datetime import datetime
 def filter_workinghours(db_path):
     # Create a connection to the database
     con = sqlite3.connect(db_path)
-    # filter for all incoming calls during working hours
-    df = pd.read_sql_query("""SELECT * FROM df_anon WHERE Gehend LIKE 'I' AND 
-                            (((Zeit BETWEEN '08:00:00' AND '12:00:00' OR Zeit BETWEEN '13:30:00' AND '17:00:00') AND
-                            Wochentag != 'Samstag' AND Wochentag != 'Sonntag' AND Wochentag != 'Freitag') OR 
-                            ((Zeit BETWEEN '08:00:00' AND '12:00:00' OR Zeit BETWEEN '13:30:00' AND '16:00:00') AND Wochentag = 'Freitag'))""", con)
+    # filter for all inbound/outbound calls during working hours
+    def read_db(in_or_out):
+        
+        return pd.read_sql_query(f"""SELECT * FROM df_anon WHERE Gehend LIKE '{in_or_out}' AND 
+                        (((Zeit BETWEEN '08:00:00' AND '12:00:00' OR Zeit BETWEEN '13:30:00' AND '17:00:00') AND
+                        Wochentag != 'Samstag' AND Wochentag != 'Sonntag' AND Wochentag != 'Freitag') OR 
+                        ((Zeit BETWEEN '08:00:00' AND '12:00:00' OR Zeit BETWEEN '13:30:00' AND '16:00:00') AND Wochentag = 'Freitag'))""", con)
 
-    # print the amount of rows (each call is one row)
-    print("Jährliche Anzahl von Anrufen während den Öffnungszeiten (Feiertagen nicht berücksichtigt):  ", df.shape[0])
-    # Write the dataframe to the database: "df_working_hours"
-    df.to_sql(name='df_working_hours', con=con, if_exists="replace")
+
+    df_inbound = read_db('I')
+    df_outbound = read_db('O')
+
+    # Write the dataframe to the database: "df_working_hours_inbound"
+    df_inbound.to_sql(name='df_working_hours_inbound', con=con, if_exists="replace")
+    df_outbound.to_sql(name='df_working_hours_outbound', con=con, if_exists="replace")
     # close the connection to the database
     con.close()
 
 
 # function to extract the amount of calls during the daily hours
-def amount_of_calls_during_hours(db_path):
+def amount_of_calls_during_hours(db_path, in_or_out):
     # Create a connection to the database
     con = sqlite3.connect(db_path)
     # function to query the db and return a dataframe
     def check_hours_connected(start,end):
-        return pd.read_sql_query(f"SELECT Wochentag, Zeit FROM df_working_hours WHERE Zeit BETWEEN '{start}:00' AND '{end}:00' AND Verbunden = 1", con)
+        return pd.read_sql_query(f"SELECT Wochentag, Zeit FROM df_working_hours_{in_or_out} WHERE Zeit BETWEEN '{start}:00' AND '{end}:00' AND Verbunden = 1", con)
     def check_hours_lost(start,end):
-        return pd.read_sql_query(f"SELECT Wochentag, Zeit FROM df_working_hours WHERE Zeit BETWEEN '{start}:00' AND '{end}:00' AND Verloren = 1", con)
+        return pd.read_sql_query(f"SELECT Wochentag, Zeit FROM df_working_hours_{in_or_out} WHERE Zeit BETWEEN '{start}:00' AND '{end}:00' AND Verloren = 1", con)
     
     # create a dictonary and call the function about with the given start and end time.
     dict_calls_per_hour = {
@@ -51,21 +56,19 @@ def amount_of_calls_during_hours(db_path):
     df.columns =['Verbunden',  "Verloren"]
     # calc the ratio between lost and connected
     df["Verhältnis"] = df["Verbunden"]/df["Verloren"]
-    # print the dataframe
-    print("Jährliche Anzahl von Anrufen während:", df)
-    # Write the dataframe to the database: "df_number_of_calls_during_hours_lost_connected"
-    df.to_sql(name='df_number_of_calls_during_hours_lost_connected', con=con, if_exists="replace")
+    # Write the dataframe to the database: "df_number_of_calls_during_hours_lost_connected_inbound / outbound"
+    df.to_sql(name=f"df_number_of_calls_during_hours_{in_or_out}", con=con, if_exists="replace")
     # close the connection to the database
     con.close()
 
 
 # function to extract the amount of calls on each weekday
-def amount_of_calls_during_weekdays(db_path):
+def amount_of_calls_during_weekdays(db_path, in_or_out):
     # Create a connection to the database
     con = sqlite3.connect(db_path)
     # function to query the db and return a dataframe
     def check_days(day):
-        return pd.read_sql_query(f"SELECT Wochentag, Zeit FROM df_working_hours WHERE Wochentag = '{day}' ", con)
+        return pd.read_sql_query(f"SELECT Wochentag, Zeit FROM df_working_hours_{in_or_out} WHERE Wochentag = '{day}' ", con)
     
     # create a dictonary and call the function about with the given weekday.
     dict_calls_per_weekday = {
@@ -79,21 +82,19 @@ def amount_of_calls_during_weekdays(db_path):
     df = pd.DataFrame.from_dict(dict_calls_per_weekday, orient='index')
     # name the columns
     df.columns =['Anzahl Total']
-    # print the dataframe
-    print("Jährliche Anzahl von Anrufen während:", df)
-    # Write the dataframe to the database: "df_number_of_calls_during_weekdays"
-    df.to_sql(name='df_number_of_calls_during_weekdays', con=con, if_exists="replace")
+    # Write the dataframe to the database: "df_number_of_calls_during_weekdays_inbound / outbound"
+    df.to_sql(name=f"df_number_of_calls_during_weekdays_{in_or_out}", con=con, if_exists="replace")
     # close the connection to the database
     con.close()
 
 
 # function to extract the amount of calls on each month
-def amount_of_calls_during_months(db_path):
+def amount_of_calls_during_months(db_path, in_or_out):
     # Create a connection to the database
     con = sqlite3.connect(db_path)
     # function to query the db and return a dataframe
     def check_months(month):
-        return pd.read_sql_query(f"SELECT Tag, Monat, Jahr FROM df_working_hours WHERE Monat = '{month}' ", con)
+        return pd.read_sql_query(f"SELECT Tag, Monat, Jahr FROM df_working_hours_{in_or_out} WHERE Monat = '{month}' ", con)
     
     # create a dictonary and call the function about with the given weekday.
     dict_calls_per_month = {
@@ -114,21 +115,19 @@ def amount_of_calls_during_months(db_path):
     df = pd.DataFrame.from_dict(dict_calls_per_month, orient='index')
     # name the columns
     df.columns =['Anzahl Total']
-    # print the dataframe
-    print("Jährliche Anzahl von Anrufen während Monat:", df)
-    # Write the dataframe to the database: "df_number_of_calls_during_months"
-    df.to_sql(name='df_number_of_calls_during_months', con=con, if_exists="replace")
+    # Write the dataframe to the database: "df_number_of_calls_during_months_inbound / outbound"
+    df.to_sql(name=f"df_number_of_calls_during_months_{in_or_out}", con=con, if_exists="replace")
     # close the connection to the database
     con.close()
 
 
 # function to extract the amount of calls each date of the whole year
-def amount_of_calls_each_date(db_path):
+def amount_of_calls_each_date(db_path, in_or_out):
     # Create a connection to the database
     con = sqlite3.connect(db_path)
     # function to query the db and return a dataframe
     def check_months(search_date):
-        return pd.read_sql_query(f"SELECT Tag, Monat, Jahr FROM df_working_hours WHERE Datum = '{search_date}' ", con)
+        return pd.read_sql_query(f"SELECT Tag, Monat, Jahr FROM df_working_hours_{in_or_out} WHERE Datum = '{search_date}' ", con)
     
     # create a dictonary
     dict_calls_per_date = {}
@@ -144,9 +143,29 @@ def amount_of_calls_each_date(db_path):
 
     # change the dict to a dataframe
     df = pd.DataFrame.from_dict(dict_calls_per_date, orient='index')
-    # print the dataframe
-    print("Summe der Tägliche Anrufe an jedem Datum:", df)
+    # name the columns
+    df.columns =['Anzahl Anrufe']
     # Write the dataframe to the database: "df_amount_of_calls_each_date"
-    df.to_sql(name='df_amount_of_calls_each_date', con=con, if_exists="replace")
+    df.to_sql(name=f"df_amount_of_calls_each_date_{in_or_out}", con=con, if_exists="replace")
+    # close the connection to the database
+    con.close()
+
+
+# function to count the number of calls from every number. (only incoming calls during working hours)
+def amount_of_calls_from_same_number(db_path):
+    # Create a connection to the database
+    con = sqlite3.connect(db_path)
+    # function to query the db and return a dataframe
+    def get_df():
+        return pd.read_sql_query(f"SELECT Rufnummer FROM df_working_hours_inbound", con)
+    
+    # create a Pandas.Series with values and their number of occurrences
+    number_of_calls_per_tel_number = get_df().value_counts()
+    # Create a df
+    df = number_of_calls_per_tel_number.to_frame()
+    # name the columns
+    df.columns =['Anzahl Anrufe']
+    # Write the dataframe to the database: "df_amount_of_calls_from_same_number"
+    df.to_sql(name='df_amount_of_calls_from_same_number', con=con, if_exists="replace")
     # close the connection to the database
     con.close()
