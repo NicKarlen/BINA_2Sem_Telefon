@@ -17,9 +17,9 @@ def plot_amount_of_calls_during_X(db_path):
     fig, axes = plt.subplots(nrows=1, ncols=3, sharex=False)
 
     # Output the plots
-    df_hours.plot.bar(x="index", y=["Verbunden"]+["Verloren"], ax=axes[0], xlabel='Tageszeiten', ylabel="Anzahl Eingehende Anrufe", legend=True)
-    df_weekdays.plot.bar(x="index", y=["Anzahl Total"], ax=axes[1], xlabel='Wochentage', legend=True)
-    df_months.plot.bar(x="index", y=["Anzahl Total"], ax=axes[2], xlabel='Monate', legend=True)
+    df_hours.plot.bar(x="index", y=["Inbound_Verbunden"]+["Inbound_Verloren"], ax=axes[0], xlabel='Tageszeiten', ylabel="Anzahl Eingehende Anrufe", legend=True)
+    df_weekdays.plot.bar(x="index", y=["Inbound_Anzahl_Total"], ax=axes[1], xlabel='Wochentage', legend=True)
+    df_months.plot.bar(x="index", y=["Inbound_Anzahl_Total"], ax=axes[2], xlabel='Monate', legend=True)
     # Adjust the spacing at the bottom of the window
     plt.subplots_adjust(bottom=0.3)
     # Set main titel above all subplots
@@ -40,7 +40,7 @@ def plot_amount_of_daily_calls(db_path):
     df_daily_calls['date'] = df_daily_calls['index'].str[:10]
 
     # Output the plots
-    ax = df_daily_calls.plot.bar(x="date", y=["Anzahl Anrufe"], xlabel='Datum', 
+    ax = df_daily_calls.plot.bar(x="date", y=["Inbound_Anzahl_Total"], xlabel='Datum', 
                             ylabel="Anzahl Eingehende Anrufe", legend=False)
 
     # Only show every 5th tick label
