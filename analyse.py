@@ -70,7 +70,7 @@ def amount_of_calls_during_hours(db_path):
     # calc the ratio between lost and connected
     df_outbound["Outbound_Verhältnis"] = df_outbound["Outbound_Verbunden"]/df_outbound["Outbound_Verloren"]
 
-    # df = pd.merge(df_inbound, df_outbound, left_on='index', right_on='index')
+    # concat the two dfs to one
     df = pd.concat([df_inbound, df_outbound], axis=1)
 
     # Write the dataframe to the database: "df_number_of_calls_during_hours_lost_connected_inbound / outbound"
@@ -80,90 +80,135 @@ def amount_of_calls_during_hours(db_path):
 
 
 # function to extract the amount of calls on each weekday
-def amount_of_calls_during_weekdays(db_path, in_or_out):
+def amount_of_calls_during_weekdays(db_path):
     # Create a connection to the database
     con = sqlite3.connect(db_path)
-    # function to query the db and return a dataframe
-    def check_days(day):
-        return pd.read_sql_query(f"SELECT Wochentag, Zeit FROM df_working_hours_{in_or_out} WHERE Wochentag = '{day}' ", con)
-    
-    # create a dictonary and call the function about with the given weekday.
-    dict_calls_per_weekday = {
-        "Montag": check_days('Montag').shape[0],
-        "Dienstag": check_days('Dienstag').shape[0],
-        "Mittwoch": check_days('Mittwoch').shape[0],
-        "Donnerstag": check_days('Donnerstag').shape[0],
-        "Freitag": check_days('Freitag').shape[0]
-    }
+
+    def get_in_or_outbound(in_or_out):
+        # function to query the db and return a dataframe
+        def check_days(day):
+            return pd.read_sql_query(f"SELECT Wochentag, Zeit FROM df_working_hours_{in_or_out} WHERE Wochentag = '{day}' ", con)
+        
+        # create a dictonary and call the function about with the given weekday.
+        dict_calls_per_weekday = {
+            "Montag": check_days('Montag').shape[0],
+            "Dienstag": check_days('Dienstag').shape[0],
+            "Mittwoch": check_days('Mittwoch').shape[0],
+            "Donnerstag": check_days('Donnerstag').shape[0],
+            "Freitag": check_days('Freitag').shape[0]
+        }
+
+        return dict_calls_per_weekday
+
     # change the dict to a dataframe
-    df = pd.DataFrame.from_dict(dict_calls_per_weekday, orient='index')
+    df_inbound = pd.DataFrame.from_dict(get_in_or_outbound('inbound'), orient='index')
     # name the columns
-    df.columns =['Anzahl Total']
-    # Write the dataframe to the database: "df_number_of_calls_during_weekdays_inbound / outbound"
-    df.to_sql(name=f"df_number_of_calls_during_weekdays_{in_or_out}", con=con, if_exists="replace")
+    df_inbound.columns =['Inbound_Anzahl_Total']
+
+    # change the dict to a dataframe
+    df_outbound = pd.DataFrame.from_dict(get_in_or_outbound('outbound'), orient='index')
+    # name the columns
+    df_outbound.columns =['Outbound_Anzahl_Total']
+
+    # concat the two dfs to one
+    df = pd.concat([df_inbound, df_outbound], axis=1)
+
+
+    # Write the dataframe to the database: "df_number_of_calls_during_weekdays"
+    df.to_sql(name=f"df_number_of_calls_during_weekdays", con=con, if_exists="replace")
     # close the connection to the database
     con.close()
 
 
 # function to extract the amount of calls on each month
-def amount_of_calls_during_months(db_path, in_or_out):
+def amount_of_calls_during_months(db_path):
     # Create a connection to the database
     con = sqlite3.connect(db_path)
-    # function to query the db and return a dataframe
-    def check_months(month):
-        return pd.read_sql_query(f"SELECT Tag, Monat, Jahr FROM df_working_hours_{in_or_out} WHERE Monat = '{month}' ", con)
-    
-    # create a dictonary and call the function about with the given weekday.
-    dict_calls_per_month = {
-        "01": check_months('1').shape[0],
-        "02": check_months('2').shape[0],
-        "03": check_months('3').shape[0],
-        "04": check_months('4').shape[0],
-        "05": check_months('5').shape[0],
-        "06": check_months('6').shape[0],
-        "07": check_months('7').shape[0],
-        "08": check_months('8').shape[0],
-        "09": check_months('9').shape[0],
-        "10": check_months('10').shape[0],
-        "11": check_months('11').shape[0],
-        "12": check_months('12').shape[0]
-    }
+
+    def get_in_or_outbound(in_or_out):
+        # function to query the db and return a dataframe
+        def check_months(month):
+            return pd.read_sql_query(f"SELECT Tag, Monat, Jahr FROM df_working_hours_{in_or_out} WHERE Monat = '{month}' ", con)
+        
+        # create a dictonary and call the function about with the given weekday.
+        dict_calls_per_month = {
+            "01": check_months('1').shape[0],
+            "02": check_months('2').shape[0],
+            "03": check_months('3').shape[0],
+            "04": check_months('4').shape[0],
+            "05": check_months('5').shape[0],
+            "06": check_months('6').shape[0],
+            "07": check_months('7').shape[0],
+            "08": check_months('8').shape[0],
+            "09": check_months('9').shape[0],
+            "10": check_months('10').shape[0],
+            "11": check_months('11').shape[0],
+            "12": check_months('12').shape[0]
+        }
+
+        return dict_calls_per_month
+
     # change the dict to a dataframe
-    df = pd.DataFrame.from_dict(dict_calls_per_month, orient='index')
+    df_inbound = pd.DataFrame.from_dict(get_in_or_outbound('inbound'), orient='index')
     # name the columns
-    df.columns =['Anzahl Total']
-    # Write the dataframe to the database: "df_number_of_calls_during_months_inbound / outbound"
-    df.to_sql(name=f"df_number_of_calls_during_months_{in_or_out}", con=con, if_exists="replace")
+    df_inbound.columns =['Inbound_Anzahl_Total']
+
+    # change the dict to a dataframe
+    df_outbound = pd.DataFrame.from_dict(get_in_or_outbound('outbound'), orient='index')
+    # name the columns
+    df_outbound.columns =['Outbound_Anzahl_Total']
+
+    # concat the two dfs to one
+    df = pd.concat([df_inbound, df_outbound], axis=1)
+
+    # Write the dataframe to the database: "df_number_of_calls_during_months"
+    df.to_sql(name=f"df_number_of_calls_during_months", con=con, if_exists="replace")
     # close the connection to the database
     con.close()
 
 
 # function to extract the amount of calls each date of the whole year
-def amount_of_calls_each_date(db_path, in_or_out):
+def amount_of_calls_each_date(db_path):
     # Create a connection to the database
     con = sqlite3.connect(db_path)
-    # function to query the db and return a dataframe
-    def check_months(search_date):
-        return pd.read_sql_query(f"SELECT Tag, Monat, Jahr FROM df_working_hours_{in_or_out} WHERE Datum = '{search_date}' ", con)
-    
-    # create a dictonary
-    dict_calls_per_date = {}
+
     # start and end date for the date array function "pd.date_range"
     start_date = datetime(year=2021,month=4,day=28)
     end_date = datetime(year=2022,month=4,day=25)
     # pandas function to get an array of dates. freq='B' stands for Business so we only get the business days during that time.
     weekday_dates = pd.date_range(start=start_date, end=end_date, freq='B')
 
-    # search for calls on each date from the above array
-    for date in weekday_dates:
-        dict_calls_per_date[date] = check_months(date).shape[0]
+
+    def get_in_or_outbound(in_or_out):
+        # function to query the db and return a dataframe
+        def check_months(search_date):
+            return pd.read_sql_query(f"SELECT Tag, Monat, Jahr FROM df_working_hours_{in_or_out} WHERE Datum = '{search_date}' ", con)
+        
+        # create a dictonary
+        dict_calls_per_date = {}
+
+        # search for calls on each date from the above array
+        for date in weekday_dates:
+            dict_calls_per_date[date] = check_months(date).shape[0]
+
+        return dict_calls_per_date
+
 
     # change the dict to a dataframe
-    df = pd.DataFrame.from_dict(dict_calls_per_date, orient='index')
+    df_inbound = pd.DataFrame.from_dict(get_in_or_outbound('inbound'), orient='index')
     # name the columns
-    df.columns =['Anzahl Anrufe']
+    df_inbound.columns =['Inbound_Anzahl_Total']
+
+    # change the dict to a dataframe
+    df_outbound = pd.DataFrame.from_dict(get_in_or_outbound('outbound'), orient='index')
+    # name the columns
+    df_outbound.columns =['Outbound_Anzahl_Total']
+
+    # concat the two dfs to one
+    df = pd.concat([df_inbound, df_outbound], axis=1)
+
     # Write the dataframe to the database: "df_amount_of_calls_each_date"
-    df.to_sql(name=f"df_amount_of_calls_each_date_{in_or_out}", con=con, if_exists="replace")
+    df.to_sql(name=f"df_amount_of_calls_each_date", con=con, if_exists="replace")
     # close the connection to the database
     con.close()
 

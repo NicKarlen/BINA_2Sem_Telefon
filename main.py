@@ -21,13 +21,10 @@ if __name__ == "__main__":
 
     """ Build Data Models """
     # analyse.filter_workinghours(db_path)
-    analyse.amount_of_calls_during_hours(db_path)
-    # analyse.amount_of_calls_during_weekdays(db_path, 'inbound')
-    # analyse.amount_of_calls_during_weekdays(db_path, 'outbound')
-    # analyse.amount_of_calls_during_months(db_path, 'inbound')
-    # analyse.amount_of_calls_during_months(db_path, 'outbound')
-    # analyse.amount_of_calls_each_date(db_path, 'inbound')
-    # analyse.amount_of_calls_each_date(db_path, 'outbound')
+    # analyse.amount_of_calls_during_hours(db_path)
+    # analyse.amount_of_calls_during_weekdays(db_path)
+    # analyse.amount_of_calls_during_months(db_path)
+    analyse.amount_of_calls_each_date(db_path)
     # analyse.amount_of_calls_from_same_number(db_path)
 
     """ Explore the Data """
