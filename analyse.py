@@ -18,7 +18,7 @@ def filter_workinghours(db_path):
                         Wochentag != 'Samstag' AND Wochentag != 'Sonntag' AND Wochentag != 'Freitag') OR 
                         ((Zeit BETWEEN '08:00:00' AND '12:00:00' OR Zeit BETWEEN '13:30:00' AND '16:00:00') AND Wochentag = 'Freitag'))""", con)
 
-
+    # Call the query function for inbound and outbound calls
     df_inbound = read_db('I')
     df_outbound = read_db('O')
 
@@ -30,16 +30,27 @@ def filter_workinghours(db_path):
 
 
 # function to extract the amount of calls during the daily hours
-def amount_of_calls_during_hours(db_path):
+def amount_of_calls_during_hours(db_path, team=None):
     # Create a connection to the database
     con = sqlite3.connect(db_path)
-
+    # function to query for the inbound and outbound data
     def get_in_or_outbound(in_or_out):
-        # function to query the db and return a dataframe
-        def check_hours_connected(start,end):
-            return pd.read_sql_query(f"SELECT Wochentag, Zeit FROM df_working_hours_{in_or_out} WHERE Zeit BETWEEN '{start}:00' AND '{end}:00' AND Verbunden = 1", con)
-        def check_hours_lost(start,end):
-            return pd.read_sql_query(f"SELECT Wochentag, Zeit FROM df_working_hours_{in_or_out} WHERE Zeit BETWEEN '{start}:00' AND '{end}:00' AND Verloren = 1", con)
+        # If no team is given
+        if team == None:
+            # function to query the db and return a dataframe
+            def check_hours_connected(start,end):
+                return pd.read_sql_query(f"SELECT Wochentag, Zeit FROM df_working_hours_{in_or_out} WHERE Zeit BETWEEN '{start}:00' AND '{end}:00' AND Verbunden = 1", con)
+            def check_hours_lost(start,end):
+                return pd.read_sql_query(f"SELECT Wochentag, Zeit FROM df_working_hours_{in_or_out} WHERE Zeit BETWEEN '{start}:00' AND '{end}:00' AND Verloren = 1", con)
+        # If a team is given
+        else:
+            # function to query the db and return a dataframe
+            def check_hours_connected(start,end):
+                return pd.read_sql_query(f"""SELECT Wochentag, Zeit FROM df_working_hours_{in_or_out} 
+                                             WHERE Zeit BETWEEN '{start}:00' AND '{end}:00' AND Verbunden = 1 AND Team = '{team}'""", con)
+            def check_hours_lost(start,end):
+                return pd.read_sql_query(f"""SELECT Wochentag, Zeit FROM df_working_hours_{in_or_out}
+                                             WHERE Zeit BETWEEN '{start}:00' AND '{end}:00' AND Verloren = 1 AND Team = '{team}'""", con)
         
         # create a dictonary and call the function about with the given start and end time.
         dict_calls_per_hour = {
@@ -80,14 +91,22 @@ def amount_of_calls_during_hours(db_path):
 
 
 # function to extract the amount of calls on each weekday
-def amount_of_calls_during_weekdays(db_path):
+def amount_of_calls_during_weekdays(db_path, team=None):
     # Create a connection to the database
     con = sqlite3.connect(db_path)
-
+    # function to query for the inbound and outbound data
     def get_in_or_outbound(in_or_out):
-        # function to query the db and return a dataframe
-        def check_days(day):
-            return pd.read_sql_query(f"SELECT Wochentag, Zeit FROM df_working_hours_{in_or_out} WHERE Wochentag = '{day}' ", con)
+        # If no team is given
+        if team == None:
+            # function to query the db and return a dataframe
+            def check_days(day):
+                return pd.read_sql_query(f"SELECT Wochentag, Zeit FROM df_working_hours_{in_or_out} WHERE Wochentag = '{day}' ", con)
+        # If a team is given
+        else:
+            # function to query the db and return a dataframe
+            def check_days(day):
+                return pd.read_sql_query(f"""SELECT Wochentag, Zeit FROM df_working_hours_{in_or_out} 
+                                             WHERE Wochentag = '{day}' AND Team = '{team}' """, con)           
         
         # create a dictonary and call the function about with the given weekday.
         dict_calls_per_weekday = {
@@ -121,14 +140,21 @@ def amount_of_calls_during_weekdays(db_path):
 
 
 # function to extract the amount of calls on each month
-def amount_of_calls_during_months(db_path):
+def amount_of_calls_during_months(db_path, team=None):
     # Create a connection to the database
     con = sqlite3.connect(db_path)
-
+    # function to query for the inbound and outbound data
     def get_in_or_outbound(in_or_out):
-        # function to query the db and return a dataframe
-        def check_months(month):
-            return pd.read_sql_query(f"SELECT Tag, Monat, Jahr FROM df_working_hours_{in_or_out} WHERE Monat = '{month}' ", con)
+        # If no team is given
+        if team == None:
+            # function to query the db and return a dataframe
+            def check_months(month):
+                return pd.read_sql_query(f"SELECT Tag, Monat, Jahr FROM df_working_hours_{in_or_out} WHERE Monat = '{month}' ", con)
+        # If a team is given
+        else:
+            def check_months(month):
+                return pd.read_sql_query(f"""SELECT Tag, Monat, Jahr FROM df_working_hours_{in_or_out} 
+                                             WHERE Monat = '{month}' AND Team = '{team}' """, con)
         
         # create a dictonary and call the function about with the given weekday.
         dict_calls_per_month = {
@@ -178,7 +204,7 @@ def amount_of_calls_each_date(db_path):
     # pandas function to get an array of dates. freq='B' stands for Business so we only get the business days during that time.
     weekday_dates = pd.date_range(start=start_date, end=end_date, freq='B')
 
-
+    # function to query for the inbound and outbound data
     def get_in_or_outbound(in_or_out):
         # function to query the db and return a dataframe
         def check_months(search_date):
@@ -218,6 +244,7 @@ def amount_of_calls_from_same_number(db_path):
     # Create a connection to the database
     con = sqlite3.connect(db_path)
     
+    # function to query for the inbound and outbound data
     def get_in_or_outbound(in_or_out):
         # function to query the db and return a dataframe
         def get_df():
@@ -239,3 +266,4 @@ def amount_of_calls_from_same_number(db_path):
     df.to_sql(name='df_amount_of_calls_from_same_number', con=con, if_exists="replace")
     # close the connection to the database
     con.close()
+

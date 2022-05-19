@@ -3,7 +3,7 @@ import sqlite3
 import matplotlib.pyplot as plt
 from datetime import date
 
-def plot_amount_of_calls_during_X(db_path):
+def plot_amount_of_calls_during_X(db_path, team=None):
     # Create a connection to the database
     con = sqlite3.connect(db_path)
     # query the db and return a dataframe
@@ -26,7 +26,10 @@ def plot_amount_of_calls_during_X(db_path):
     # Adjust the spacing at the bottom of the window
     plt.subplots_adjust(left=0.202,bottom=0.148,right=0.795,top=0.921,wspace=0.179,hspace=0.476)
     # Set main titel above all subplots
-    fig.suptitle("Auswertung der Ein- und Ausgehenden Anrufe während der Öffnungszeiten")
+    if team == None:
+        fig.suptitle("Auswertung der Ein- und Ausgehenden Anrufe während der Öffnungszeiten")
+    else:
+        fig.suptitle(f"Auswertung der Ein- und Ausgehenden Anrufe während der Öffnungszeiten ACHTUNG: Nur für Team: {team}")
     # Show the plot
     plt.show()    
 

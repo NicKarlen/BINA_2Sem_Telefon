@@ -11,6 +11,13 @@ base_directory = os.path.dirname(os.path.realpath(__file__))
 # DB Path
 db_path = f"{base_directory}/{db_name}"
 
+# Function to call all analyse function for a team specific analysis
+def get_team_analysis(db_path, team):
+    analyse.amount_of_calls_during_hours(db_path, team=team)
+    analyse.amount_of_calls_during_weekdays(db_path, team=team)
+    analyse.amount_of_calls_during_months(db_path, team=team)
+
+    plot_data.plot_amount_of_calls_during_X(db_path, team)
 
 """ Main """
 if __name__ == "__main__":
@@ -30,7 +37,9 @@ if __name__ == "__main__":
     """ Explore the Data """
     # plot_data.plot_amount_of_calls_during_X(db_path)
     # plot_data.plot_amount_of_daily_calls(db_path)
-    plot_data.plot_amount_of_calls_from_same_number(db_path)
+    # plot_data.plot_amount_of_calls_from_same_number(db_path)
 
+    """ Combined functions """
+    get_team_analysis(db_path, 'T4B')
 
     print("Code finished.........")
