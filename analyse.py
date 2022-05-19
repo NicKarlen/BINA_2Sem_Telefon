@@ -217,16 +217,24 @@ def amount_of_calls_each_date(db_path):
 def amount_of_calls_from_same_number(db_path):
     # Create a connection to the database
     con = sqlite3.connect(db_path)
-    # function to query the db and return a dataframe
-    def get_df():
-        return pd.read_sql_query(f"SELECT Rufnummer FROM df_working_hours_inbound", con)
     
-    # create a Pandas.Series with values and their number of occurrences
-    number_of_calls_per_tel_number = get_df().value_counts()
-    # Create a df
-    df = number_of_calls_per_tel_number.to_frame()
+    def get_in_or_outbound(in_or_out):
+        # function to query the db and return a dataframe
+        def get_df():
+            return pd.read_sql_query(f"SELECT Rufnummer FROM df_working_hours_{in_or_out}", con)
+        
+        # create a Pandas.Series with values and their number of occurrences
+        number_of_calls_per_tel_number = get_df().value_counts()
+        # Create a df
+        df = number_of_calls_per_tel_number.to_frame()
+
+        return df
+
+    df = pd.concat([get_in_or_outbound('inbound'), get_in_or_outbound('outbound')], axis=1)
+
     # name the columns
-    df.columns =['Anzahl Anrufe']
+    df.columns =['Inbound_Anzahl_Total', 'Outbound_Anzahl_Total']
+
     # Write the dataframe to the database: "df_amount_of_calls_from_same_number"
     df.to_sql(name='df_amount_of_calls_from_same_number', con=con, if_exists="replace")
     # close the connection to the database
