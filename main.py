@@ -12,7 +12,7 @@ base_directory = os.path.dirname(os.path.realpath(__file__))
 db_path = f"{base_directory}/{db_name}"
 
 # Function to call all analyse function for a team specific analysis
-def get_team_analysis(db_path, team):
+def get_team_analysis(db_path, team=None):
     analyse.amount_of_calls_during_hours(db_path, team=team)
     analyse.amount_of_calls_during_weekdays(db_path, team=team)
     analyse.amount_of_calls_during_months(db_path, team=team)
@@ -40,6 +40,7 @@ if __name__ == "__main__":
     # plot_data.plot_amount_of_calls_from_same_number(db_path)
 
     """ Combined functions """
+    # get_team_analysis(db_path)
     get_team_analysis(db_path, 'T4C')
 
     print("Code finished.........")

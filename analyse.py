@@ -22,6 +22,31 @@ def filter_workinghours(db_path):
     df_inbound = read_db('I')
     df_outbound = read_db('O')
 
+    # Clean up double entries from the reception (only needed for inbound calls)
+    df_inbound['similar'] = 0
+    def delete_double_entries(row):
+        try:
+            if ((row['Zeit'] == df_inbound.loc[row.name+1,'Zeit'] and 
+                row['Rufnummer'] == df_inbound.loc[row.name+1,'Rufnummer'] and
+                row['Verbunden'] != 1) or
+                (row['Zeit'] == df_inbound.loc[row.name-1,'Zeit'] and 
+                row['Rufnummer'] == df_inbound.loc[row.name-1,'Rufnummer'] and
+                df_inbound.loc[row.name-1,'Verbunden'] == 1) or
+                (row['Zeit'] == df_inbound.loc[row.name-2,'Zeit'] and 
+                row['Rufnummer'] == df_inbound.loc[row.name-2,'Rufnummer'] and
+                df_inbound.loc[row.name-2,'Verbunden'] == 1) or
+                (row['Zeit'] == df_inbound.loc[row.name-3,'Zeit'] and 
+                row['Rufnummer'] == df_inbound.loc[row.name-3,'Rufnummer'] and
+                df_inbound.loc[row.name-3,'Verbunden'] == 1)):
+                row['similar'] = 1
+            return row
+        except:
+            return row
+    # call function above on every row
+    df_inbound = df_inbound.apply(delete_double_entries, axis="columns")
+    # drop all rows where 'similar' is equal 1
+    df_inbound.drop(df_inbound[df_inbound.similar == 1].index, inplace=True)
+
     # Write the dataframe to the database: "df_working_hours_inbound"
     df_inbound.to_sql(name='df_working_hours_inbound', con=con, if_exists="replace")
     df_outbound.to_sql(name='df_working_hours_outbound', con=con, if_exists="replace")
