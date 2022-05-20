@@ -40,6 +40,6 @@ if __name__ == "__main__":
     # plot_data.plot_amount_of_calls_from_same_number(db_path)
 
     """ Combined functions """
-    get_team_analysis(db_path, 'T4B')
+    get_team_analysis(db_path, 'T4C')
 
     print("Code finished.........")
