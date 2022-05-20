@@ -102,3 +102,36 @@ def plot_amount_of_calls_from_same_number(db_path):
     fig.suptitle("Auswertung der ein- und ausgehenden Rufnummern während der Öffnungszeiten")
     # Show the plot
     plt.show()  
+
+def plot_call_duration(db_path):
+    """
+        The call duration from the data makes no sense and will not be used in the analysis!
+        A lot of call durations are negativ and some are more than 12h long?! (positiv and negativ?!)
+
+    """
+    # Create a connection to the database
+    con = sqlite3.connect(db_path)
+    # query the db and return a dataframe
+    df_inbound = pd.read_sql_query(f"SELECT * FROM df_working_hours_inbound", con)
+    # close the connection to the database
+    con.close()
+    # cut the hh:mm:ss from the index and make a new row "date"
+
+    df_inbound['date'] = df_inbound['Datum'].str[:10]
+
+    ax = df_inbound.plot(kind='scatter',x="date", y=["Rufdauer"], xlabel='date', 
+                            ylabel="Rufdauer in Sekunden", legend=False)
+
+    ax.set_yscale('log')
+
+    # Only show every 5th tick label
+    for i, t in enumerate(ax.get_xticklabels()):
+        if (i % 5) != 0:
+            t.set_visible(False)
+
+    plt.xticks(rotation='vertical')
+
+    # Set titel
+    plt.title("Auswertung Rufdauer während der Öffnungszeiten")
+    # Show the plot
+    plt.show() 

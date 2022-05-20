@@ -38,9 +38,10 @@ if __name__ == "__main__":
     # plot_data.plot_amount_of_calls_during_X(db_path)
     # plot_data.plot_amount_of_daily_calls(db_path)
     # plot_data.plot_amount_of_calls_from_same_number(db_path)
+    # plot_data.plot_call_duration(db_path) # --> data makes no sense...
 
     """ Combined functions """
     # get_team_analysis(db_path)
-    get_team_analysis(db_path, 'T4C')
+    # get_team_analysis(db_path, 'T4C')
 
     print("Code finished.........")
