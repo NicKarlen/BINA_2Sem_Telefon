@@ -63,30 +63,26 @@ def amount_of_calls_during_hours(db_path, team=None):
         # If no team is given
         if team == None:
             # function to query the db and return a dataframe
-            def check_hours_connected(start,end):
-                return pd.read_sql_query(f"SELECT Wochentag, Zeit FROM df_working_hours_{in_or_out} WHERE Zeit BETWEEN '{start}:00' AND '{end}:00' AND Verbunden = 1", con)
-            def check_hours_lost(start,end):
-                return pd.read_sql_query(f"SELECT Wochentag, Zeit FROM df_working_hours_{in_or_out} WHERE Zeit BETWEEN '{start}:00' AND '{end}:00' AND Verloren = 1", con)
+            def check_hours(start, end, connected_or_lost):
+                return pd.read_sql_query(f"""SELECT Wochentag, Zeit FROM df_working_hours_{in_or_out}
+                                             WHERE Zeit BETWEEN '{start}:00' AND '{end}:00' AND {connected_or_lost} = 1""", con)
         # If a team is given
         else:
             # function to query the db and return a dataframe
-            def check_hours_connected(start,end):
+            def check_hours(start, end, connected_or_lost):
                 return pd.read_sql_query(f"""SELECT Wochentag, Zeit FROM df_working_hours_{in_or_out} 
-                                             WHERE Zeit BETWEEN '{start}:00' AND '{end}:00' AND Verbunden = 1 AND Team = '{team}'""", con)
-            def check_hours_lost(start,end):
-                return pd.read_sql_query(f"""SELECT Wochentag, Zeit FROM df_working_hours_{in_or_out}
-                                             WHERE Zeit BETWEEN '{start}:00' AND '{end}:00' AND Verloren = 1 AND Team = '{team}'""", con)
+                                             WHERE Zeit BETWEEN '{start}:00' AND '{end}:00' AND {connected_or_lost} = 1 AND Team = '{team}'""", con)
         
         # create a dictonary and call the function about with the given start and end time.
         dict_calls_per_hour = {
-            "08:00 - 09:00": [check_hours_connected('08:00','09:00').shape[0],check_hours_lost('08:00','09:00').shape[0]],
-            "09:00 - 10:00": [check_hours_connected('09:00','10:00').shape[0],check_hours_lost('09:00','10:00').shape[0]],
-            "10:00 - 11:00": [check_hours_connected('10:00','11:00').shape[0],check_hours_lost('10:00','11:00').shape[0]],
-            "11:00 - 12:00": [check_hours_connected('11:00','12:00').shape[0],check_hours_lost('11:00','12:00').shape[0]],
-            "13:30 - 14:00": [check_hours_connected('13:30','14:00').shape[0],check_hours_lost('13:30','14:00').shape[0]],
-            "14:00 - 15:00": [check_hours_connected('14:00','15:00').shape[0],check_hours_lost('14:00','15:00').shape[0]],
-            "15:00 - 16:00": [check_hours_connected('15:00','16:00').shape[0],check_hours_lost('15:00','16:00').shape[0]],
-            "16:00 - 17:00": [check_hours_connected('16:00','17:00').shape[0],check_hours_lost('16:00','17:00').shape[0]]
+            "08:00 - 09:00": [check_hours('08:00','09:00', 'Verbunden').shape[0],check_hours('08:00','09:00', 'Verloren').shape[0]],
+            "09:00 - 10:00": [check_hours('09:00','10:00', 'Verbunden').shape[0],check_hours('09:00','10:00', 'Verloren').shape[0]],
+            "10:00 - 11:00": [check_hours('10:00','11:00', 'Verbunden').shape[0],check_hours('10:00','11:00', 'Verloren').shape[0]],
+            "11:00 - 12:00": [check_hours('11:00','12:00', 'Verbunden').shape[0],check_hours('11:00','12:00', 'Verloren').shape[0]],
+            "13:30 - 14:00": [check_hours('13:30','14:00', 'Verbunden').shape[0],check_hours('13:30','14:00', 'Verloren').shape[0]],
+            "14:00 - 15:00": [check_hours('14:00','15:00', 'Verbunden').shape[0],check_hours('14:00','15:00', 'Verloren').shape[0]],
+            "15:00 - 16:00": [check_hours('15:00','16:00', 'Verbunden').shape[0],check_hours('15:00','16:00', 'Verloren').shape[0]],
+            "16:00 - 17:00": [check_hours('16:00','17:00', 'Verbunden').shape[0],check_hours('16:00','17:00', 'Verloren').shape[0]]
         }
 
         return dict_calls_per_hour
@@ -232,15 +228,15 @@ def amount_of_calls_each_date(db_path):
     # function to query for the inbound and outbound data
     def get_in_or_outbound(in_or_out):
         # function to query the db and return a dataframe
-        def check_months(search_date):
-            return pd.read_sql_query(f"SELECT Tag, Monat, Jahr FROM df_working_hours_{in_or_out} WHERE Datum = '{search_date}' ", con)
+        def check_months(search_date,connected_or_lost):
+            return pd.read_sql_query(f"SELECT Tag, Monat, Jahr FROM df_working_hours_{in_or_out} WHERE Datum = '{search_date}' AND {connected_or_lost} = 1", con)
         
         # create a dictonary
         dict_calls_per_date = {}
 
-        # search for calls on each date from the above array
+        # search for calls on each date from the weekday_dates array, for connected and lost calls
         for date in weekday_dates:
-            dict_calls_per_date[date] = check_months(date).shape[0]
+            dict_calls_per_date[date] = [check_months(date, 'Verbunden').shape[0], check_months(date, 'Verloren').shape[0]]
 
         return dict_calls_per_date
 
@@ -248,12 +244,12 @@ def amount_of_calls_each_date(db_path):
     # change the dict to a dataframe
     df_inbound = pd.DataFrame.from_dict(get_in_or_outbound('inbound'), orient='index')
     # name the columns
-    df_inbound.columns =['Inbound_Anzahl_Total']
+    df_inbound.columns =['Inbound_Verbunden', 'Inbound_Verloren']
 
     # change the dict to a dataframe
     df_outbound = pd.DataFrame.from_dict(get_in_or_outbound('outbound'), orient='index')
     # name the columns
-    df_outbound.columns =['Outbound_Anzahl_Total']
+    df_outbound.columns =['Outbound_Verbunden', 'Outbound_Verloren']
 
     # concat the two dfs to one
     df = pd.concat([df_inbound, df_outbound], axis=1)

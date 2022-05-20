@@ -12,7 +12,7 @@ base_directory = os.path.dirname(os.path.realpath(__file__))
 db_path = f"{base_directory}/{db_name}"
 
 # Function to call all analyse function for a team specific analysis
-def get_team_analysis(db_path, team=None):
+def get_hourly_weekly_monthly_breakdown(db_path, team=None):
     analyse.amount_of_calls_during_hours(db_path, team=team)
     analyse.amount_of_calls_during_weekdays(db_path, team=team)
     analyse.amount_of_calls_during_months(db_path, team=team)
@@ -28,20 +28,16 @@ if __name__ == "__main__":
 
     """ Build Data Models """
     # analyse.filter_workinghours(db_path)
-    # analyse.amount_of_calls_during_hours(db_path)
-    # analyse.amount_of_calls_during_weekdays(db_path)
-    # analyse.amount_of_calls_during_months(db_path)
     # analyse.amount_of_calls_each_date(db_path)
     # analyse.amount_of_calls_from_same_number(db_path)
 
     """ Explore the Data """
-    # plot_data.plot_amount_of_calls_during_X(db_path)
     # plot_data.plot_amount_of_daily_calls(db_path)
     # plot_data.plot_amount_of_calls_from_same_number(db_path)
     # plot_data.plot_call_duration(db_path) # --> data makes no sense...
 
     """ Combined functions """
-    # get_team_analysis(db_path)
-    # get_team_analysis(db_path, 'T4C')
+    get_hourly_weekly_monthly_breakdown(db_path)
+    # get_hourly_weekly_monthly_breakdown(db_path, 'T4C')
 
     print("Code finished.........")

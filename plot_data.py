@@ -17,7 +17,7 @@ def plot_amount_of_calls_during_X(db_path, team=None):
     fig, axes = plt.subplots(nrows=2, ncols=3, sharex=False)
 
     # Output the plots
-    df_hours.plot.bar(x="index", y=["Inbound_Verbunden"]+["Inbound_Verloren"], ax=axes[0,0], xlabel='Tageszeiten', ylabel="Anzahl Eingehende Anrufe", legend=True)
+    df_hours.plot.bar(x="index", y=["Inbound_Verbunden"]+["Inbound_Verloren"], ax=axes[0,0], xlabel='Tageszeiten', ylabel="Anzahl Eingehende Anrufe", legend=True) # , stacked=True
     df_hours.plot.bar(x="index", y=["Outbound_Verbunden"]+["Outbound_Verloren"], ax=axes[1,0], xlabel='Tageszeiten', ylabel="Anzahl Ausgehende Anrufe", legend=True)
     df_weekdays.plot.bar(x="index", y=["Inbound_Anzahl_Total"], ax=axes[0,1], xlabel='Wochentage', legend=True)
     df_weekdays.plot.bar(x="index", y=["Outbound_Anzahl_Total"], ax=axes[1,1], xlabel='Wochentage', legend=True)
@@ -49,11 +49,11 @@ def plot_amount_of_daily_calls(db_path):
     df_daily_calls['date'] = df_daily_calls['index'].str[:10]
 
     # Output the plots
-    df_daily_calls.plot.bar(x="date", y=["Inbound_Anzahl_Total"], xlabel='Datum', 
-                            ylabel="Anzahl Eingehende Anrufe", legend=False, ax=axes[0])
+    df_daily_calls.plot.bar(x="date", y=["Inbound_Verbunden", "Inbound_Verloren"], xlabel='Datum', 
+                            ylabel="Anzahl Eingehende Anrufe", legend=True, ax=axes[0])
 
-    df_daily_calls.plot.bar(x="date", y=["Outbound_Anzahl_Total"], xlabel='Datum', 
-                            ylabel="Anzahl Ausgehende Anrufe", legend=False, ax=axes[1])
+    df_daily_calls.plot.bar(x="date", y=["Outbound_Verbunden", "Outbound_Verloren"], xlabel='Datum', 
+                            ylabel="Anzahl Ausgehende Anrufe", legend=True, ax=axes[1])
 
     # Only show every 5th tick label
     for i, t in enumerate(axes[1].get_xticklabels()):
@@ -63,7 +63,7 @@ def plot_amount_of_daily_calls(db_path):
     # Adjust the spacing at the bottom of the window
     plt.subplots_adjust(bottom=0.14, hspace=0.114)
     # Set titel
-    fig.suptitle("Auswertung der Eingehenden Anrufe während der Öffnungszeiten")
+    fig.suptitle("Auswertung der ein- und ausgehenden, verbundenen oder verlorenen Anrufe während der Öffnungszeiten")
     # Show the plot
     plt.show()  
 
