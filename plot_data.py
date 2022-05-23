@@ -29,7 +29,7 @@ def plot_amount_of_calls_during_X(db_path, team=None):
     df_hours.plot(kind='line', x="index", y="Outbound_Lost_Percent",ax=axes[1,0], secondary_y=["Outbound_Lost_Percent"], color='green')
     axes[1,0].tick_params('x', labelrotation=90)
     # Adjust the spacing at the bottom of the window
-    plt.subplots_adjust(left=0.202,bottom=0.208,right=0.795,top=0.921,wspace=0.800,hspace=0.784) # -> for notebook
+    plt.subplots_adjust(left=0.098,bottom=0.208,right=0.929,top=0.921,wspace=0.554,hspace=0.784) # -> for notebook
     # plt.subplots_adjust(left=0.202,bottom=0.148,right=0.795,top=0.921,wspace=0.179,hspace=0.476) # -> for desktop
     # Set main titel above all subplots
     if team == None:

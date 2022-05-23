@@ -36,8 +36,8 @@ if __name__ == "__main__":
     # plot_data.plot_amount_of_calls_from_same_number(db_path)
     # plot_data.plot_call_duration(db_path) # --> data makes no sense...
 
-    """ Combined functions """
+    """ Combined functions (Build & Plot) """
     get_hourly_weekly_monthly_breakdown(db_path)
-    # get_hourly_weekly_monthly_breakdown(db_path, 'T4C')
+    # get_hourly_weekly_monthly_breakdown(db_path, 'T4B')
 
     print("Code finished.........")

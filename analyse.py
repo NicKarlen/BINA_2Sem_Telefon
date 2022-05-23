@@ -23,6 +23,8 @@ def filter_workinghours(db_path):
     df_outbound = read_db('O')
 
     # Clean up double entries from the reception (only needed for inbound calls)
+    # There are always 4 entries for the reception.
+    # If one call was connected then delete all the others, if no call is connected delete all but one. 
     df_inbound['similar'] = 0
     def delete_double_entries(row):
         try:
@@ -73,7 +75,7 @@ def amount_of_calls_during_hours(db_path, team=None):
                 return pd.read_sql_query(f"""SELECT Wochentag, Zeit FROM df_working_hours_{in_or_out} 
                                              WHERE Zeit BETWEEN '{start}:00' AND '{end}:00' AND {connected_or_lost} = 1 AND Team = '{team}'""", con)
         
-        # create a dictonary and call the function about with the given start and end time.
+        # create a dictonary and call the function about with the given start and end time and if we should look for lost or connected calls.
         dict_calls_per_hour = {
             "08:00 - 09:00": [check_hours('08:00','09:00', 'Verbunden').shape[0],check_hours('08:00','09:00', 'Verloren').shape[0]],
             "09:00 - 10:00": [check_hours('09:00','10:00', 'Verbunden').shape[0],check_hours('09:00','10:00', 'Verloren').shape[0]],
@@ -92,14 +94,14 @@ def amount_of_calls_during_hours(db_path, team=None):
     df_inbound = pd.DataFrame.from_dict(get_in_or_outbound('inbound'), orient='index')
     # name the columns
     df_inbound.columns =['Inbound_Verbunden',  "Inbound_Verloren"]
-    # calc the ratio between lost and connected
+    # calc the lost percentage of the total number of inbound calls
     df_inbound["Inbound_Lost_Percent"] = (df_inbound["Inbound_Verloren"] / (df_inbound["Inbound_Verbunden"]+df_inbound["Inbound_Verloren"])) *100
 
     # Outbound: change dict to df
     df_outbound = pd.DataFrame.from_dict(get_in_or_outbound('outbound'), orient='index')
     # name the columns
     df_outbound.columns =['Outbound_Verbunden',  "Outbound_Verloren"]
-    # calc the ratio between lost and connected
+    # calc the lost percentage of the total number of outbound calls
     df_outbound["Outbound_Lost_Percent"] = (df_outbound["Outbound_Verloren"] / (df_outbound["Outbound_Verbunden"]+df_outbound["Outbound_Verloren"])) * 100
 
     # concat the two dfs to one
@@ -130,7 +132,7 @@ def amount_of_calls_during_weekdays(db_path, team=None):
                 return pd.read_sql_query(f"""SELECT Wochentag, Zeit FROM df_working_hours_{in_or_out} 
                                              WHERE Wochentag = '{day}' AND {connected_or_lost} = 1 AND Team = '{team}' """, con)           
         
-        # create a dictonary and call the function about with the given weekday.
+        # create a dictonary and call the function about with the given weekday and lost/connected calls.
         dict_calls_per_weekday = {
             "Montag": [check_days('Montag', "Verbunden").shape[0], check_days('Montag', "Verloren").shape[0]],
             "Dienstag": [check_days('Dienstag', "Verbunden").shape[0], check_days('Dienstag', "Verloren").shape[0]],
@@ -179,7 +181,7 @@ def amount_of_calls_during_months(db_path, team=None):
                 return pd.read_sql_query(f"""SELECT Tag, Monat, Jahr FROM df_working_hours_{in_or_out} 
                                              WHERE Monat = '{month}' AND {connected_or_lost} = 1 AND Team = '{team}' """, con)
         
-        # create a dictonary and call the function about with the given weekday.
+        # create a dictonary and call the function about with the given months and if lost/connected calls.
         dict_calls_per_month = {
             "01": [check_months('1', "Verbunden").shape[0],check_months('1', "Verloren").shape[0]],
             "02": [check_months('2', "Verbunden").shape[0],check_months('2', "Verloren").shape[0]],
@@ -233,7 +235,7 @@ def amount_of_calls_each_date(db_path):
         def check_months(search_date,connected_or_lost):
             return pd.read_sql_query(f"SELECT Tag, Monat, Jahr FROM df_working_hours_{in_or_out} WHERE Datum = '{search_date}' AND {connected_or_lost} = 1", con)
         
-        # create a dictonary
+        # create a empty dictonary
         dict_calls_per_date = {}
 
         # search for calls on each date from the weekday_dates array, for connected and lost calls
@@ -275,11 +277,12 @@ def amount_of_calls_from_same_number(db_path):
         
         # create a Pandas.Series with values and their number of occurrences
         number_of_calls_per_tel_number = get_df().value_counts()
-        # Create a df
+        # Create a df from the series object
         df = number_of_calls_per_tel_number.to_frame()
 
         return df
 
+    # combine the two dataframes that we get from the function above (inbound/outbound)
     df = pd.concat([get_in_or_outbound('inbound'), get_in_or_outbound('outbound')], axis=1)
 
     # name the columns
