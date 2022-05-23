@@ -19,12 +19,18 @@ def plot_amount_of_calls_during_X(db_path, team=None):
     # Output the plots
     df_hours.plot.bar(x="index", y=["Inbound_Verbunden"]+["Inbound_Verloren"], ax=axes[0,0], xlabel='Tageszeiten', ylabel="Anzahl Eingehende Anrufe", legend=True) # , stacked=True
     df_hours.plot.bar(x="index", y=["Outbound_Verbunden"]+["Outbound_Verloren"], ax=axes[1,0], xlabel='Tageszeiten', ylabel="Anzahl Ausgehende Anrufe", legend=True)
-    df_weekdays.plot.bar(x="index", y=["Inbound_Anzahl_Total"], ax=axes[0,1], xlabel='Wochentage', legend=True)
-    df_weekdays.plot.bar(x="index", y=["Outbound_Anzahl_Total"], ax=axes[1,1], xlabel='Wochentage', legend=True)
-    df_months.plot.bar(x="index", y=["Inbound_Anzahl_Total"], ax=axes[0,2], xlabel='Monate', legend=True)
-    df_months.plot.bar(x="index", y=["Outbound_Anzahl_Total"], ax=axes[1,2], xlabel='Monate', legend=True)
+    df_weekdays.plot.bar(x="index", y=["Inbound_Verbunden"]+["Inbound_Verloren"], ax=axes[0,1], xlabel='Wochentage', legend=True)
+    df_weekdays.plot.bar(x="index", y=["Outbound_Verbunden"]+["Outbound_Verloren"], ax=axes[1,1], xlabel='Wochentage', legend=True)
+    df_months.plot.bar(x="index", y=["Inbound_Verbunden"]+["Inbound_Verloren"], ax=axes[0,2], xlabel='Monate', legend=True)
+    df_months.plot.bar(x="index", y=["Outbound_Verbunden"]+["Outbound_Verloren"], ax=axes[1,2], xlabel='Monate', legend=True)
+
+    df_hours.plot(kind='line', x="index", y="Inbound_Lost_Percent",ax=axes[0,0], secondary_y=["Inbound_Lost_Percent"], color='green')
+    axes[0,0].tick_params('x', labelrotation=90)
+    df_hours.plot(kind='line', x="index", y="Outbound_Lost_Percent",ax=axes[1,0], secondary_y=["Outbound_Lost_Percent"], color='green')
+    axes[1,0].tick_params('x', labelrotation=90)
     # Adjust the spacing at the bottom of the window
-    plt.subplots_adjust(left=0.202,bottom=0.148,right=0.795,top=0.921,wspace=0.179,hspace=0.476)
+    plt.subplots_adjust(left=0.202,bottom=0.208,right=0.795,top=0.921,wspace=0.800,hspace=0.784) # -> for notebook
+    # plt.subplots_adjust(left=0.202,bottom=0.148,right=0.795,top=0.921,wspace=0.179,hspace=0.476) # -> for desktop
     # Set main titel above all subplots
     if team == None:
         fig.suptitle("Auswertung der Ein- und Ausgehenden Anrufe während der Öffnungszeiten")

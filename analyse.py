@@ -93,14 +93,14 @@ def amount_of_calls_during_hours(db_path, team=None):
     # name the columns
     df_inbound.columns =['Inbound_Verbunden',  "Inbound_Verloren"]
     # calc the ratio between lost and connected
-    df_inbound["Inbound_Verhältnis"] = df_inbound["Inbound_Verbunden"]/df_inbound["Inbound_Verloren"]
+    df_inbound["Inbound_Lost_Percent"] = (df_inbound["Inbound_Verloren"] / (df_inbound["Inbound_Verbunden"]+df_inbound["Inbound_Verloren"])) *100
 
     # Outbound: change dict to df
     df_outbound = pd.DataFrame.from_dict(get_in_or_outbound('outbound'), orient='index')
     # name the columns
     df_outbound.columns =['Outbound_Verbunden',  "Outbound_Verloren"]
     # calc the ratio between lost and connected
-    df_outbound["Outbound_Verhältnis"] = df_outbound["Outbound_Verbunden"]/df_outbound["Outbound_Verloren"]
+    df_outbound["Outbound_Lost_Percent"] = (df_outbound["Outbound_Verloren"] / (df_outbound["Outbound_Verbunden"]+df_outbound["Outbound_Verloren"])) * 100
 
     # concat the two dfs to one
     df = pd.concat([df_inbound, df_outbound], axis=1)
@@ -120,22 +120,23 @@ def amount_of_calls_during_weekdays(db_path, team=None):
         # If no team is given
         if team == None:
             # function to query the db and return a dataframe
-            def check_days(day):
-                return pd.read_sql_query(f"SELECT Wochentag, Zeit FROM df_working_hours_{in_or_out} WHERE Wochentag = '{day}' ", con)
+            def check_days(day, connected_or_lost):
+                return pd.read_sql_query(f"""SELECT Wochentag, Zeit FROM df_working_hours_{in_or_out}
+                                             WHERE Wochentag = '{day}' AND {connected_or_lost} = 1 """, con)
         # If a team is given
         else:
             # function to query the db and return a dataframe
-            def check_days(day):
+            def check_days(day, connected_or_lost):
                 return pd.read_sql_query(f"""SELECT Wochentag, Zeit FROM df_working_hours_{in_or_out} 
-                                             WHERE Wochentag = '{day}' AND Team = '{team}' """, con)           
+                                             WHERE Wochentag = '{day}' AND {connected_or_lost} = 1 AND Team = '{team}' """, con)           
         
         # create a dictonary and call the function about with the given weekday.
         dict_calls_per_weekday = {
-            "Montag": check_days('Montag').shape[0],
-            "Dienstag": check_days('Dienstag').shape[0],
-            "Mittwoch": check_days('Mittwoch').shape[0],
-            "Donnerstag": check_days('Donnerstag').shape[0],
-            "Freitag": check_days('Freitag').shape[0]
+            "Montag": [check_days('Montag', "Verbunden").shape[0], check_days('Montag', "Verloren").shape[0]],
+            "Dienstag": [check_days('Dienstag', "Verbunden").shape[0], check_days('Dienstag', "Verloren").shape[0]],
+            "Mittwoch": [check_days('Mittwoch', "Verbunden").shape[0], check_days('Mittwoch', "Verloren").shape[0]],
+            "Donnerstag": [check_days('Donnerstag', "Verbunden").shape[0], check_days('Donnerstag', "Verloren").shape[0]],
+            "Freitag": [check_days('Freitag', "Verbunden").shape[0], check_days('Freitag', "Verloren").shape[0]]
         }
 
         return dict_calls_per_weekday
@@ -143,12 +144,12 @@ def amount_of_calls_during_weekdays(db_path, team=None):
     # change the dict to a dataframe
     df_inbound = pd.DataFrame.from_dict(get_in_or_outbound('inbound'), orient='index')
     # name the columns
-    df_inbound.columns =['Inbound_Anzahl_Total']
+    df_inbound.columns =['Inbound_Verbunden', 'Inbound_Verloren']
 
     # change the dict to a dataframe
     df_outbound = pd.DataFrame.from_dict(get_in_or_outbound('outbound'), orient='index')
     # name the columns
-    df_outbound.columns =['Outbound_Anzahl_Total']
+    df_outbound.columns =['Outbound_Verbunden', 'Outbound_Verloren']
 
     # concat the two dfs to one
     df = pd.concat([df_inbound, df_outbound], axis=1)
@@ -169,28 +170,29 @@ def amount_of_calls_during_months(db_path, team=None):
         # If no team is given
         if team == None:
             # function to query the db and return a dataframe
-            def check_months(month):
-                return pd.read_sql_query(f"SELECT Tag, Monat, Jahr FROM df_working_hours_{in_or_out} WHERE Monat = '{month}' ", con)
+            def check_months(month, connected_or_lost):
+                return pd.read_sql_query(f"""SELECT Tag, Monat, Jahr FROM df_working_hours_{in_or_out}
+                                             WHERE Monat = '{month}' AND {connected_or_lost} = 1 """, con)
         # If a team is given
         else:
-            def check_months(month):
+            def check_months(month, connected_or_lost):
                 return pd.read_sql_query(f"""SELECT Tag, Monat, Jahr FROM df_working_hours_{in_or_out} 
-                                             WHERE Monat = '{month}' AND Team = '{team}' """, con)
+                                             WHERE Monat = '{month}' AND {connected_or_lost} = 1 AND Team = '{team}' """, con)
         
         # create a dictonary and call the function about with the given weekday.
         dict_calls_per_month = {
-            "01": check_months('1').shape[0],
-            "02": check_months('2').shape[0],
-            "03": check_months('3').shape[0],
-            "04": check_months('4').shape[0],
-            "05": check_months('5').shape[0],
-            "06": check_months('6').shape[0],
-            "07": check_months('7').shape[0],
-            "08": check_months('8').shape[0],
-            "09": check_months('9').shape[0],
-            "10": check_months('10').shape[0],
-            "11": check_months('11').shape[0],
-            "12": check_months('12').shape[0]
+            "01": [check_months('1', "Verbunden").shape[0],check_months('1', "Verloren").shape[0]],
+            "02": [check_months('2', "Verbunden").shape[0],check_months('2', "Verloren").shape[0]],
+            "03": [check_months('3', "Verbunden").shape[0],check_months('3', "Verloren").shape[0]],
+            "04": [check_months('4', "Verbunden").shape[0],check_months('4', "Verloren").shape[0]],
+            "05": [check_months('5', "Verbunden").shape[0],check_months('5', "Verloren").shape[0]],
+            "06": [check_months('6', "Verbunden").shape[0],check_months('6', "Verloren").shape[0]],
+            "07": [check_months('7', "Verbunden").shape[0],check_months('7', "Verloren").shape[0]],
+            "08": [check_months('8', "Verbunden").shape[0],check_months('8', "Verloren").shape[0]],
+            "09": [check_months('9', "Verbunden").shape[0],check_months('9', "Verloren").shape[0]],
+            "10": [check_months('10', "Verbunden").shape[0],check_months('10', "Verloren").shape[0]],
+            "11": [check_months('11', "Verbunden").shape[0],check_months('11', "Verloren").shape[0]],
+            "12": [check_months('12', "Verbunden").shape[0],check_months('12', "Verloren").shape[0]]
         }
 
         return dict_calls_per_month
@@ -198,12 +200,12 @@ def amount_of_calls_during_months(db_path, team=None):
     # change the dict to a dataframe
     df_inbound = pd.DataFrame.from_dict(get_in_or_outbound('inbound'), orient='index')
     # name the columns
-    df_inbound.columns =['Inbound_Anzahl_Total']
+    df_inbound.columns =['Inbound_Verbunden', 'Inbound_Verloren']
 
     # change the dict to a dataframe
     df_outbound = pd.DataFrame.from_dict(get_in_or_outbound('outbound'), orient='index')
     # name the columns
-    df_outbound.columns =['Outbound_Anzahl_Total']
+    df_outbound.columns =['Outbound_Verbunden', 'Outbound_Verloren']
 
     # concat the two dfs to one
     df = pd.concat([df_inbound, df_outbound], axis=1)
