@@ -24,9 +24,11 @@ def plot_amount_of_calls_during_X(db_path, team=None):
     df_months.plot.bar(x="index", y=["Inbound_Verbunden"]+["Inbound_Verloren"], ax=axes[0,2], xlabel='Monate', legend=True)
     df_months.plot.bar(x="index", y=["Outbound_Verbunden"]+["Outbound_Verloren"], ax=axes[1,2], xlabel='Monate', legend=True)
 
+    # Output the line chart on top of the bar chart with a secondary y-axis.
     df_hours.plot(kind='line', x="index", y="Inbound_Lost_Percent",ax=axes[0,0], secondary_y=["Inbound_Lost_Percent"], color='green')
-    axes[0,0].tick_params('x', labelrotation=90)
     df_hours.plot(kind='line', x="index", y="Outbound_Lost_Percent",ax=axes[1,0], secondary_y=["Outbound_Lost_Percent"], color='green')
+    # Rotate the x label by 90 degree
+    axes[0,0].tick_params('x', labelrotation=90)
     axes[1,0].tick_params('x', labelrotation=90)
     # Adjust the spacing at the bottom of the window
     plt.subplots_adjust(left=0.098,bottom=0.208,right=0.929,top=0.921,wspace=0.554,hspace=0.784) # -> for notebook
