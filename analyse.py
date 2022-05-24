@@ -334,31 +334,23 @@ def amount_of_calls_from_same_number(db_path):
 def run_complete_analysis_for_all_Teams(db_path):
     # get teams and append None at the beginning. None = all teams
     teams = [None] + get_all_teams(db_path)
-    # interate over all teams
-    for index, team in enumerate(teams):
-        # if first interation the create a df from the function with the specific team
-        if index == 0:
-            df_hours = amount_of_calls_during_hours(db_path, team=team)
-            df_weeks = amount_of_calls_during_weekdays(db_path, team=team)
-            df_months = amount_of_calls_during_months(db_path, team=team)
-            df_date = amount_of_calls_each_date(db_path, team=team)
-        # append (concat) the df with the next team to the existing one
-        else:
-            df_hours = pd.concat([df_hours, amount_of_calls_during_hours(db_path, team=team)], axis=0)
-            df_weeks = pd.concat([df_weeks, amount_of_calls_during_weekdays(db_path, team=team)], axis=0)
-            df_months = pd.concat([df_months, amount_of_calls_during_months(db_path, team=team)], axis=0)
-            df_date = pd.concat([df_date, amount_of_calls_each_date(db_path, team=team)], axis=0)
-
-        if index == 3:
-            break
-
     # Create a connection to the database
     con = sqlite3.connect(db_path)
-    # Write the dataframes to the databases
-    df_hours.to_sql(name=f"df_number_of_calls_during_hours", con=con, if_exists="replace")
-    df_weeks.to_sql(name=f"df_number_of_calls_during_weekdays", con=con, if_exists="replace")
-    df_months.to_sql(name=f"df_number_of_calls_during_months", con=con, if_exists="replace")
-    df_date.to_sql(name=f"df_amount_of_calls_each_date", con=con, if_exists="replace")
+    # interate over all teams
+    for index, team in enumerate(teams):
+        # if first interation the create a new table in database
+        if index == 0:
+            amount_of_calls_during_hours(db_path, team=team).to_sql(name=f"df_number_of_calls_during_hours", con=con, if_exists="replace")
+            amount_of_calls_during_weekdays(db_path, team=team).to_sql(name=f"df_number_of_calls_during_weekdays", con=con, if_exists="replace")
+            amount_of_calls_during_months(db_path, team=team).to_sql(name=f"df_number_of_calls_during_months", con=con, if_exists="replace")
+            amount_of_calls_each_date(db_path, team=team).to_sql(name=f"df_amount_of_calls_each_date", con=con, if_exists="replace")
+        # append the df to the existing database table with the next team
+        else:
+            amount_of_calls_during_hours(db_path, team=team).to_sql(name=f"df_number_of_calls_during_hours", con=con, if_exists="append")
+            amount_of_calls_during_weekdays(db_path, team=team).to_sql(name=f"df_number_of_calls_during_weekdays", con=con, if_exists="append")
+            amount_of_calls_during_months(db_path, team=team).to_sql(name=f"df_number_of_calls_during_months", con=con, if_exists="append")
+            amount_of_calls_each_date(db_path, team=team).to_sql(name=f"df_amount_of_calls_each_date", con=con, if_exists="append")
+
     # close the connection to the database
     con.close()
 
