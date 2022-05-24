@@ -3,13 +3,13 @@ import sqlite3
 import matplotlib.pyplot as plt
 from datetime import date
 
-def plot_amount_of_calls_during_X(db_path, team=None):
+def plot_amount_of_calls_during_X(db_path, team):
     # Create a connection to the database
     con = sqlite3.connect(db_path)
     # query the db and return a dataframe
-    df_hours = pd.read_sql_query(f"SELECT * FROM df_number_of_calls_during_hours", con)
-    df_weekdays = pd.read_sql_query(f"SELECT * FROM df_number_of_calls_during_weekdays", con)
-    df_months = pd.read_sql_query(f"SELECT * FROM df_number_of_calls_during_months", con)
+    df_hours = pd.read_sql_query(f"SELECT * FROM df_number_of_calls_during_hours WHERE Team = '{team}'", con)
+    df_weekdays = pd.read_sql_query(f"SELECT * FROM df_number_of_calls_during_weekdays WHERE Team = '{team}'", con)
+    df_months = pd.read_sql_query(f"SELECT * FROM df_number_of_calls_during_months WHERE Team = '{team}'", con)
     # close the connection to the database
     con.close()
 
@@ -46,7 +46,7 @@ def plot_amount_of_calls_during_X(db_path, team=None):
     # plt.subplots_adjust(left=0.098,bottom=0.208,right=0.929,top=0.921,wspace=0.554,hspace=0.784) # -> for notebook
     plt.subplots_adjust(left=0.080,bottom=0.148,right=0.929,top=0.921,wspace=0.345,hspace=0.476) # -> for desktop
     # Set main titel above all subplots
-    if team == None:
+    if team == 'all':
         fig.suptitle("Auswertung der Ein- und Ausgehenden Anrufe während der Öffnungszeiten")
     else:
         fig.suptitle(f"Auswertung der Ein- und Ausgehenden Anrufe während der Öffnungszeiten ACHTUNG: Nur für Team: {team}")

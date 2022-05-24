@@ -56,7 +56,7 @@ def filter_workinghours(db_path):
     con.close()
 
 
-# function to extract the amount of calls during the daily hours
+# function to extract the amount of calls during the daily hours for a specific team
 def amount_of_calls_during_hours(db_path, team=None):
     # Create a connection to the database
     con = sqlite3.connect(db_path)
@@ -113,13 +113,13 @@ def amount_of_calls_during_hours(db_path, team=None):
     else:
         df['Team'] = team
 
-    # Write the dataframe to the database: "df_number_of_calls_during_hours_lost_connected_inbound / outbound"
-    df.to_sql(name=f"df_number_of_calls_during_hours", con=con, if_exists="replace")
     # close the connection to the database
     con.close()
 
+    return df
 
-# function to extract the amount of calls on each weekday
+
+# function to extract the amount of calls on each weekday for a specific team
 def amount_of_calls_during_weekdays(db_path, team=None):
     # Create a connection to the database
     con = sqlite3.connect(db_path)
@@ -172,13 +172,13 @@ def amount_of_calls_during_weekdays(db_path, team=None):
     else:
         df['Team'] = team
 
-    # Write the dataframe to the database: "df_number_of_calls_during_weekdays"
-    df.to_sql(name=f"df_number_of_calls_during_weekdays", con=con, if_exists="replace")
     # close the connection to the database
     con.close()
 
+    return df
 
-# function to extract the amount of calls on each month
+
+# function to extract the amount of calls on each month for a specific team
 def amount_of_calls_during_months(db_path, team=None):
     # Create a connection to the database
     con = sqlite3.connect(db_path)
@@ -237,14 +237,14 @@ def amount_of_calls_during_months(db_path, team=None):
     else:
         df['Team'] = team
 
-    # Write the dataframe to the database: "df_number_of_calls_during_months"
-    df.to_sql(name=f"df_number_of_calls_during_months", con=con, if_exists="replace")
     # close the connection to the database
     con.close()
 
+    return df
+
 
 # function to extract the amount of calls each date of the whole year
-def amount_of_calls_each_date(db_path):
+def amount_of_calls_each_date(db_path, team=None):
     # Create a connection to the database
     con = sqlite3.connect(db_path)
 
@@ -257,9 +257,15 @@ def amount_of_calls_each_date(db_path):
     # function to query for the inbound and outbound data
     def get_in_or_outbound(in_or_out):
         # function to query the db and return a dataframe
-        def check_months(search_date,connected_or_lost):
-            return pd.read_sql_query(f"SELECT Tag, Monat, Jahr FROM df_working_hours_{in_or_out} WHERE Datum = '{search_date}' AND {connected_or_lost} = 1", con)
-        
+        if team == None:
+            def check_months(search_date,connected_or_lost):
+                return pd.read_sql_query(f"""SELECT Tag, Monat, Jahr FROM df_working_hours_{in_or_out}
+                                             WHERE Datum = '{search_date}' AND {connected_or_lost} = 1""", con)
+        else:
+            def check_months(search_date,connected_or_lost):
+                return pd.read_sql_query(f"""SELECT Tag, Monat, Jahr FROM df_working_hours_{in_or_out}
+                                             WHERE Datum = '{search_date}' AND {connected_or_lost} = 1 AND Team = '{team}' """, con)
+
         # create a empty dictonary
         dict_calls_per_date = {}
 
@@ -283,10 +289,16 @@ def amount_of_calls_each_date(db_path):
     # concat the two dfs to one
     df = pd.concat([df_inbound, df_outbound], axis=1)
 
-    # Write the dataframe to the database: "df_amount_of_calls_each_date"
-    df.to_sql(name=f"df_amount_of_calls_each_date", con=con, if_exists="replace")
+    # append team
+    if team == None:
+        df['Team'] = 'all'
+    else:
+        df['Team'] = team
+
     # close the connection to the database
     con.close()
+
+    return df
 
 
 # function to count the number of calls from every number. (only incoming calls during working hours)
@@ -317,3 +329,52 @@ def amount_of_calls_from_same_number(db_path):
     df.to_sql(name='df_amount_of_calls_from_same_number', con=con, if_exists="replace")
     # close the connection to the database
     con.close()
+
+# run all the amount of calls during hours,weeks,months - functions for all teams
+def run_complete_analysis_for_all_Teams(db_path):
+    # get teams and append None at the beginning. None = all teams
+    teams = [None] + get_all_teams(db_path)
+    # interate over all teams
+    for index, team in enumerate(teams):
+        # if first interation the create a df from the function with the specific team
+        if index == 0:
+            df_hours = amount_of_calls_during_hours(db_path, team=team)
+            df_weeks = amount_of_calls_during_weekdays(db_path, team=team)
+            df_months = amount_of_calls_during_months(db_path, team=team)
+            df_date = amount_of_calls_each_date(db_path, team=team)
+        # append (concat) the df with the next team to the existing one
+        else:
+            df_hours = pd.concat([df_hours, amount_of_calls_during_hours(db_path, team=team)], axis=0)
+            df_weeks = pd.concat([df_weeks, amount_of_calls_during_weekdays(db_path, team=team)], axis=0)
+            df_months = pd.concat([df_months, amount_of_calls_during_months(db_path, team=team)], axis=0)
+            df_date = pd.concat([df_date, amount_of_calls_each_date(db_path, team=team)], axis=0)
+
+        if index == 3:
+            break
+
+    # Create a connection to the database
+    con = sqlite3.connect(db_path)
+    # Write the dataframes to the databases
+    df_hours.to_sql(name=f"df_number_of_calls_during_hours", con=con, if_exists="replace")
+    df_weeks.to_sql(name=f"df_number_of_calls_during_weekdays", con=con, if_exists="replace")
+    df_months.to_sql(name=f"df_number_of_calls_during_months", con=con, if_exists="replace")
+    df_date.to_sql(name=f"df_amount_of_calls_each_date", con=con, if_exists="replace")
+    # close the connection to the database
+    con.close()
+
+# function to get all the teams 
+def get_all_teams(db_path):
+    # Create a connection to the database
+    con = sqlite3.connect(db_path)
+    # query the db and return a dataframe with the teams
+    df_anon = pd.read_sql_query(f"SELECT Team FROM df_anon", con)
+    # close the connection to the database
+    con.close()
+    # get all the unique teams
+    arr_teams = df_anon['Team'].unique()
+    # drop None's from the np.array
+    arr_teams = arr_teams[arr_teams != None]
+    # convert np.array to list and sort it
+    arr_teams = sorted(arr_teams.tolist())
+    # return the sorted unique teams list
+    return arr_teams
