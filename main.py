@@ -22,7 +22,7 @@ if __name__ == "__main__":
 
     """ Build Data Models """
     # analyse.filter_workinghours(db_path)
-    analyse.run_complete_analysis_for_all_Teams(db_path) # takes about 15min!!
+    analyse.run_complete_analysis_for_all_Teams(db_path) # takes about 71min!!
 
     # analyse.amount_of_calls_from_same_number(db_path)
 
