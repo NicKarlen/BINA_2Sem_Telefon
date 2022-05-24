@@ -9,7 +9,7 @@
 
 # Notes
 
-### Laufzeit-Problem mit Funktion amount_of_calls_each_date
+## 1. Laufzeit-Problem mit Funktion amount_of_calls_each_date
 
 zu viele iterationen:
 
@@ -19,3 +19,5 @@ zu viele iterationen:
 >>>>for i in range(**2**):      # verbunden/verloren
 
 Total iterationen = **33600**
+
+## 2. ??
