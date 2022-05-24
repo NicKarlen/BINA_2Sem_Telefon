@@ -54,11 +54,11 @@ def plot_amount_of_calls_during_X(db_path, team):
     plt.show()    
 
 
-def plot_amount_of_daily_calls(db_path):
+def plot_amount_of_daily_calls(db_path, team):
     # Create a connection to the database
     con = sqlite3.connect(db_path)
     # query the db and return a dataframe
-    df_daily_calls = pd.read_sql_query(f"SELECT * FROM df_amount_of_calls_each_date", con)
+    df_daily_calls = pd.read_sql_query(f"SELECT * FROM df_amount_of_calls_each_date WHERE Team = '{team}'", con)
     # close the connection to the database
     con.close()
 

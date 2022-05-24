@@ -22,13 +22,13 @@ if __name__ == "__main__":
 
     """ Build Data Models """
     # analyse.filter_workinghours(db_path)
-    analyse.run_complete_analysis_for_all_Teams(db_path) # takes about 71min!!
+    # analyse.run_complete_analysis_for_all_Teams(db_path) # takes about 71min!!
 
     # analyse.amount_of_calls_from_same_number(db_path)
 
     """ Explore the Data """
     # plot_data.plot_amount_of_calls_during_X(db_path, 'all') # second parameter is the team, if all teams insert 'all'
-    # plot_data.plot_amount_of_daily_calls(db_path)
+    plot_data.plot_amount_of_daily_calls(db_path, 'all')
     # plot_data.plot_amount_of_calls_from_same_number(db_path)
     # plot_data.plot_call_duration(db_path) # --> data makes no sense...
 
