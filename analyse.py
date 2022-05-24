@@ -147,11 +147,15 @@ def amount_of_calls_during_weekdays(db_path, team=None):
     df_inbound = pd.DataFrame.from_dict(get_in_or_outbound('inbound'), orient='index')
     # name the columns
     df_inbound.columns =['Inbound_Verbunden', 'Inbound_Verloren']
+    # calc the lost percentage of the total number of inbound calls
+    df_inbound["Inbound_Lost_Percent"] = (df_inbound["Inbound_Verloren"] / (df_inbound["Inbound_Verbunden"]+df_inbound["Inbound_Verloren"])) *100
 
     # change the dict to a dataframe
     df_outbound = pd.DataFrame.from_dict(get_in_or_outbound('outbound'), orient='index')
     # name the columns
     df_outbound.columns =['Outbound_Verbunden', 'Outbound_Verloren']
+    # calc the lost percentage of the total number of outbound calls
+    df_outbound["Outbound_Lost_Percent"] = (df_outbound["Outbound_Verloren"] / (df_outbound["Outbound_Verbunden"]+df_outbound["Outbound_Verloren"])) * 100
 
     # concat the two dfs to one
     df = pd.concat([df_inbound, df_outbound], axis=1)
@@ -203,11 +207,15 @@ def amount_of_calls_during_months(db_path, team=None):
     df_inbound = pd.DataFrame.from_dict(get_in_or_outbound('inbound'), orient='index')
     # name the columns
     df_inbound.columns =['Inbound_Verbunden', 'Inbound_Verloren']
+    # calc the lost percentage of the total number of inbound calls
+    df_inbound["Inbound_Lost_Percent"] = (df_inbound["Inbound_Verloren"] / (df_inbound["Inbound_Verbunden"]+df_inbound["Inbound_Verloren"])) *100
 
     # change the dict to a dataframe
     df_outbound = pd.DataFrame.from_dict(get_in_or_outbound('outbound'), orient='index')
     # name the columns
     df_outbound.columns =['Outbound_Verbunden', 'Outbound_Verloren']
+    # calc the lost percentage of the total number of outbound calls
+    df_outbound["Outbound_Lost_Percent"] = (df_outbound["Outbound_Verloren"] / (df_outbound["Outbound_Verbunden"]+df_outbound["Outbound_Verloren"])) * 100
 
     # concat the two dfs to one
     df = pd.concat([df_inbound, df_outbound], axis=1)
