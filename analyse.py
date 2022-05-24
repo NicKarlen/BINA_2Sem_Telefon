@@ -107,6 +107,12 @@ def amount_of_calls_during_hours(db_path, team=None):
     # concat the two dfs to one
     df = pd.concat([df_inbound, df_outbound], axis=1)
 
+    # append team
+    if team == None:
+        df['Team'] = 'all'
+    else:
+        df['Team'] = team
+
     # Write the dataframe to the database: "df_number_of_calls_during_hours_lost_connected_inbound / outbound"
     df.to_sql(name=f"df_number_of_calls_during_hours", con=con, if_exists="replace")
     # close the connection to the database
@@ -160,6 +166,11 @@ def amount_of_calls_during_weekdays(db_path, team=None):
     # concat the two dfs to one
     df = pd.concat([df_inbound, df_outbound], axis=1)
 
+    # append team
+    if team == None:
+        df['Team'] = 'all'
+    else:
+        df['Team'] = team
 
     # Write the dataframe to the database: "df_number_of_calls_during_weekdays"
     df.to_sql(name=f"df_number_of_calls_during_weekdays", con=con, if_exists="replace")
@@ -219,6 +230,12 @@ def amount_of_calls_during_months(db_path, team=None):
 
     # concat the two dfs to one
     df = pd.concat([df_inbound, df_outbound], axis=1)
+
+    # append team
+    if team == None:
+        df['Team'] = 'all'
+    else:
+        df['Team'] = team
 
     # Write the dataframe to the database: "df_number_of_calls_during_months"
     df.to_sql(name=f"df_number_of_calls_during_months", con=con, if_exists="replace")
@@ -300,4 +317,3 @@ def amount_of_calls_from_same_number(db_path):
     df.to_sql(name='df_amount_of_calls_from_same_number', con=con, if_exists="replace")
     # close the connection to the database
     con.close()
-
