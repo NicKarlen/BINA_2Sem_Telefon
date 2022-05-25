@@ -3,7 +3,7 @@ import sqlite3
 import matplotlib.pyplot as plt
 from datetime import date
 
-def plot_amount_of_calls_during_X(db_path, team):
+def plot_amount_of_calls_during_X(db_path, team='all', save=False):
     # Create a connection to the database
     con = sqlite3.connect(db_path)
     # query the db and return a dataframe
@@ -50,11 +50,18 @@ def plot_amount_of_calls_during_X(db_path, team):
         fig.suptitle("Auswertung der Ein- und Ausgehenden Anrufe während der Öffnungszeiten")
     else:
         fig.suptitle(f"Auswertung der Ein- und Ausgehenden Anrufe während der Öffnungszeiten ACHTUNG: Nur für Team: {team}")
-    # Show the plot
-    plt.show()    
+
+    if save == False:
+        # Show the plot
+        plt.show()
+    else:  
+        # adjust the fig size for the saved image
+        plt.gcf().set_size_inches(26, 10)
+        # Save plot
+        plt.savefig('Saved_Charts/calls_during_X.png', bbox_inches='tight' , dpi=300) 
 
 
-def plot_amount_of_daily_calls(db_path, team):
+def plot_amount_of_daily_calls(db_path, team='all', save=False):
     # Create a connection to the database
     con = sqlite3.connect(db_path)
     # query the db and return a dataframe
@@ -87,12 +94,15 @@ def plot_amount_of_daily_calls(db_path, team):
         fig.suptitle("Auswertung der Ein- und Ausgehenden Anrufe während der Öffnungszeiten")
     else:
         fig.suptitle(f"Auswertung der Ein- und Ausgehenden Anrufe während der Öffnungszeiten ACHTUNG: Nur für Team: {team}")
-    # Show the plot
-    # plt.show()  
-    # adjust the fig size for the saved image
-    plt.gcf().set_size_inches(26, 10)
-    # Save plot
-    plt.savefig('testfig.png', bbox_inches='tight' , dpi=300)
+    
+    if save == False:
+        # Show the plot
+        plt.show()
+    else:  
+        # adjust the fig size for the saved image
+        plt.gcf().set_size_inches(26, 10)
+        # Save plot
+        plt.savefig('Saved_Charts/daily_calls.png', bbox_inches='tight' , dpi=300)
 
 
 def plot_amount_of_calls_from_same_number(db_path):
