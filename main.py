@@ -28,7 +28,9 @@ if __name__ == "__main__":
 
     """ Explore the Data """
     # plot_data.plot_amount_of_calls_during_X(db_path, 'all') # second parameter is the team, if all teams insert 'all'
-    plot_data.plot_amount_of_daily_calls(db_path, 'all')
+    plot_data.plot_amount_of_daily_calls(db_path, 'all') # second parameter is the team, if all teams insert 'all'
+
+
     # plot_data.plot_amount_of_calls_from_same_number(db_path)
     # plot_data.plot_call_duration(db_path) # --> data makes no sense...
 

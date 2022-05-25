@@ -82,10 +82,17 @@ def plot_amount_of_daily_calls(db_path, team):
 
     # Adjust the spacing at the bottom of the window
     plt.subplots_adjust(bottom=0.14, hspace=0.114)
-    # Set titel
-    fig.suptitle("Auswertung der ein- und ausgehenden, verbundenen oder verlorenen Anrufe während der Öffnungszeiten")
+    # Set main titel above all subplots
+    if team == 'all':
+        fig.suptitle("Auswertung der Ein- und Ausgehenden Anrufe während der Öffnungszeiten")
+    else:
+        fig.suptitle(f"Auswertung der Ein- und Ausgehenden Anrufe während der Öffnungszeiten ACHTUNG: Nur für Team: {team}")
     # Show the plot
-    plt.show()  
+    # plt.show()  
+    # adjust the fig size for the saved image
+    plt.gcf().set_size_inches(26, 10)
+    # Save plot
+    plt.savefig('testfig.png', bbox_inches='tight' , dpi=300)
 
 
 def plot_amount_of_calls_from_same_number(db_path):
