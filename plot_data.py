@@ -58,7 +58,7 @@ def plot_amount_of_calls_during_X(db_path, team='all', save=False):
         # adjust the fig size for the saved image
         plt.gcf().set_size_inches(26, 10)
         # Save plot
-        plt.savefig('Saved_Charts/calls_during_X.png', bbox_inches='tight' , dpi=300) 
+        plt.savefig(f"Saved_Charts/calls_during_X_team_{team}.png", bbox_inches='tight' , dpi=300) 
 
 
 def plot_amount_of_daily_calls(db_path, team='all', save=False):
@@ -102,7 +102,7 @@ def plot_amount_of_daily_calls(db_path, team='all', save=False):
         # adjust the fig size for the saved image
         plt.gcf().set_size_inches(26, 10)
         # Save plot
-        plt.savefig('Saved_Charts/daily_calls.png', bbox_inches='tight' , dpi=300)
+        plt.savefig(f"Saved_Charts/daily_calls_team_{team}.png", bbox_inches='tight' , dpi=300)
 
 
 def plot_amount_of_calls_from_same_number(db_path):
