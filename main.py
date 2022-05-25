@@ -27,7 +27,7 @@ if __name__ == "__main__":
     # analyse.amount_of_calls_from_same_number(db_path)
 
     """ Explore the Data """
-    plot_data.plot_amount_of_calls_during_X(db_path, team='all', save=True) # second parameter is the team, if all teams insert 'all'
+    plot_data.plot_amount_of_calls_during_X(db_path, team='all', save=False) # second parameter is the team, if all teams insert 'all'
     # plot_data.plot_amount_of_daily_calls(db_path, team='all', save=False) # second parameter is the team, if all teams insert 'all'
 
 
