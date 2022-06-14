@@ -5,6 +5,8 @@
 Data/
 db_anon.db
 db_anon copy.db
+db_anon_backup_before_intern_extern.db
 __pycache__/
 DashBoard/
 Saved_Charts/
+Saved_Charts_Intern_Extern/
