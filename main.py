@@ -40,10 +40,11 @@ if __name__ == "__main__":
     teams = ['all'] + analyse.get_all_teams(db_path)
     for team in teams:
         try:
+            print(team)
             plot_data.plot_amount_of_calls_during_X(db_path, team=team, save=True)
             plot_data.plot_amount_of_daily_calls(db_path, team=team, save=True)
         except:
-            print(team)
+            print("didn't work  " , team)
 
 
     
